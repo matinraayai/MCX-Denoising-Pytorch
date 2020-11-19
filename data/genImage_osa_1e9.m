@@ -10,7 +10,7 @@ N = 100; % run N times simulation for each test,
 x = 100;
 y = 100;
 z = 100;
-time = zeros(N,5);
+
 %pho_cnt = [1e5, 1e6, 1e7, 1e8];  % use 10 x 1e8 for 1e9 (as the ground truth)
 pho_cnt = [1e9];  % use 10 x 1e8 for 1e9 (as the ground truth)
 volume = uint8(ones(x,y,z));
