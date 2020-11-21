@@ -1,6 +1,7 @@
 import tensorflow as tf
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class UNetTorch(nn.Module):
@@ -63,6 +64,52 @@ class UNetTorch(nn.Module):
         up0e = self.up0e_norm(self.up0e(up0d))
         output = self.last_layer(up0e)
         return x - output
+
+
+class DnCNNTorch(nn.Module):
+    def __init__(self, output_channels=1, num_layers=17, activation_fn=F.relu):
+        super(DnCNNTorch, self).__init__()
+        self.num_layers = num_layers
+        self.activation_fn = activation_fn
+        self.__setattr__("conv1", nn.Conv2d(1, 64, 3, padding_mode='reflect', padding=1))
+        for num_layer in range(2, num_layers):
+            self.__setattr__(f"conv{num_layer}", nn.Conv2d(64, 64, 3, padding_mode='reflect', padding=1, bias=False))
+            self.__setattr__(f"norm{num_layer}", nn.BatchNorm2d(64))
+        self.__setattr__(f"conv{num_layers}", nn.Conv2d(64, output_channels, 3, padding_mode='reflect', padding=1))
+
+    def forward(self, x):
+        output = self.activation_fn(self.conv1(x))
+        for num_layer in range(2, self.num_layers):
+            output = self.__getattr__(f"conv{num_layer}")(output)
+            output = self.__getattr__(f"norm{num_layer}")(output)
+            output = self.activation_fn(output)
+        output = self.__getattr__(f"conv{self.num_layers}")(output)
+        return x - output
+
+
+class SeluTorch(nn.Module):
+    def __init__(self, scale=1.0507009873554804934193349852946, alpha=1.6732632423543772848170429916717):
+        super(SeluTorch, self).__init__()
+        self.scale = scale
+        self.alpha = alpha
+
+    def forward(self, x):
+        return self.scale * torch.where(x >= 0.0, x, self.alpha * F.elu(x))
+
+
+class CascadedDnCNNWithUNetTorch(nn.Module):
+    def __init__(self, num_dcnn=3, output_channels=1, num_dcnn_layers=17, activation_fn=F.relu):
+        super(CascadedDnCNNWithUNetTorch, self).__init__()
+        self.num_dcnn = num_dcnn
+        for num in range(self.num_dcnn):
+            self.__setattr__(f"dncnn{num}", DnCNNTorch(output_channels=output_channels,
+                                                       num_layers=num_dcnn_layers, activation_fn=activation_fn))
+        self.unet = UNetTorch()
+
+    def forward(self, x):
+        for num in range(self.num_dcnn):
+            x = self.__getattr__(f"dncnn{num}")(x)
+        return self.unet(x)
 
 
 class UNet(tf.keras.Model):
@@ -156,10 +203,10 @@ class DnCNN(tf.keras.Model):
     def __call__(self, x, training=True):
         output = self.conv1(x, training=True)
         for num_layer in range(2, self.num_layers):
-            output = self.__getattribute__(f"conv{num_layer}")(output, training=training)
-            output = self.__getattribute__(f"norm{num_layer}")(output, training=training)
+            output = self.__getattr__(f"conv{num_layer}")(output, training=training)
+            output = self.__getattr__(f"norm{num_layer}")(output, training=training)
             output = self.activation_fn(output)
-        output = self.__getattribute__(f"conv{self.num_layers}")(output, training=training)
+        output = self.__getattr__(f"conv{self.num_layers}")(output, training=training)
         return x - output
 
 
@@ -185,5 +232,5 @@ class CascadedDnCNNWithUNet(tf.keras.Model):
 
     def __call__(self, x, training=True):
         for num in range(self.num_dcnn):
-            x = self.__getattribute__(f"dncnn{num}")(x, training=training)
+            x = self.__getattr__(f"dncnn{num}")(x, training=training)
         return self.unet(x, training=training)
