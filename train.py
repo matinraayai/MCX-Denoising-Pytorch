@@ -1,8 +1,10 @@
-import tensorflow as tf
+import torch
+from torch.utils.data import DataLoader
 from data.dataset import OsaDataset
 from model import CascadedDnCNNWithUNet
 import argparse
 import tqdm
+from multiprocessing import cpu_count
 
 
 parser = argparse.ArgumentParser(description='')
@@ -14,49 +16,50 @@ parser.add_argument('--data-root', dest='data_root', default='mcxlab/osa/', help
 parser.add_argument('--input-file-name', dest='input_file_name', default='1e+05/%d.mat')
 parser.add_argument('--input-label-name', dest='input_label_name', default='1e+07/%d.mat')
 parser.add_argument('--dataset-length', dest='dataset_length', type=int, default=100)
+parser.add_argument('--dataloader-workers', dest='dataloader_workers', type=int, default=cpu_count() - 1,
+                    help='number of processes used for the training dataloader')
 args = parser.parse_args()
 
 
 def main(kwargs):
-    optimizer = tf.keras.optimizers.Adam(learning_rate=kwargs.lr)
-    loss = tf.keras.losses.MeanSquaredError()
+    model = CascadedDnCNNWithUNet(num_dcnn=1).cuda()
+    optimizer = torch.optim.Adam(lr=kwargs.lr, params=model.parameters())
+    loss = torch.nn.MSELoss()
     train_dataset = OsaDataset(kwargs.data_root, kwargs.input_file_name,
-                               kwargs.input_label_name, kwargs.dataset_length).batch(args.batch_size)
-    model = CascadedDnCNNWithUNet(num_dcnn=1)
+                               kwargs.input_label_name, int(kwargs.dataset_length * 0.75))
+    valid_dataset = OsaDataset(kwargs.data_root, kwargs.input_file_name,
+                               kwargs.input_label_name, int(kwargs.dataset_length * 0.25), start_idx=75)
+    train_dataloader = DataLoader(train_dataset, args.batch_size, shuffle=True, num_workers=kwargs.dataloader_workers)
+    valid_dataloader = DataLoader(valid_dataset, args.batch_size, shuffle=True, num_workers=kwargs.dataloader_workers)
 
     for epoch_num in range(kwargs.num_epochs):
-        iterator = tqdm.tqdm(train_dataset.enumerate())
-        iterator.set_description(f"Epoch #{epoch_num}:")
+        model.train()
+        iterator = tqdm.tqdm(train_dataloader)
+        iterator.set_description(f"Epoch #{epoch_num}")
 
     # Iterate over the batches of the dataset.
-        for step, thing in iterator:
-            x_batch_train = thing[:, 0, :, :, :]
-            y_batch_train = thing[:, 1, :, :, :]
-            # Open a GradientTape to record the operations run
-            # during the forward pass, which enables auto-differentiation.
-            with tf.GradientTape() as tape:
+        for x_batch_train, y_batch_train in iterator:
+            x_batch_train, y_batch_train = x_batch_train.cuda(), y_batch_train.cuda()
+            optimizer.zero_grad()
+            logits = model(x_batch_train)
+            loss_value = loss(y_batch_train, logits)
 
-                # Run the forward pass of the layer.
-                # The operations that the layer applies
-                # to its inputs are going to be recorded
-                # on the GradientTape.
-                logits = model(x_batch_train, training=True)  # Logits for this minibatch
+            loss_value.backward()
+            optimizer.step()
+            iterator.set_postfix({"Model Loss": "{:.5f}".format(loss_value.item())})
 
-                # Compute the loss value for this minibatch.
-                loss_value = loss(y_batch_train, logits)
-
-                # Use the gradient tape to automatically retrieve
-                # the gradients of the trainable variables with respect to the loss.
-                grads = tape.gradient(loss_value, model.trainable_weights)
-
-                # Run one step of gradient descent by updating
-                # the value of the variables to minimize the loss.
-                optimizer.apply_gradients(zip(grads, model.trainable_weights))
-
-        # Log every 200 batches.
-            if step % 5 == 0:
-                print("Training loss (for one batch) at step %d: %.4f" % (step, float(loss_value)))
-                print("Seen so far: %s samples" % ((step + 1) * 64))
+        model.train(False)
+        iterator_valid = tqdm.tqdm(valid_dataloader)
+        iterator_valid.set_description(f"Validation Epoch #{epoch_num}")
+        total_loss = 0.
+        for x_batch_valid, y_batch_valid in iterator_valid:
+            with torch.no_grad():
+                x_batch_valid, y_batch_valid = x_batch_valid.cuda(), y_batch_valid.cuda()
+                logits = model(x_batch_valid)
+                loss_value = loss(y_batch_valid, logits)
+                total_loss += loss_value
+                iterator_valid.set_postfix({"Model Loss": "{:.5f}".format(loss_value.item())})
+        print(f"Validation Loss: {total_loss / len(valid_dataset)}")
 
 
 if __name__ == '__main__':
