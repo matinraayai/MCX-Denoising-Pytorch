@@ -27,8 +27,8 @@ if nargin < 5
 end
 
 
-vol = random_shape_volume(imsize, maxprop, 5, 50) + 1;
-maxprop = max(vol(:));
+[vol, maxprop] = random_polygon_in_2d_volume(imsize, randi(maxprop), 5, 50);
+vol = vol + 1;
 cfg.vol = permute(uint8(vol), [3, 1, 2]);
 
 cfg.issrcfrom0 = 1;

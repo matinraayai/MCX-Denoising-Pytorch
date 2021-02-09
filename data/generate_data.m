@@ -1,6 +1,6 @@
 clear all;
 % Variables for the script
-PHOTON_LIST = [1e5 1e6 1e7 1e8];
+PHOTON_LIST = [1e5 1e6 1e7 1e8 1e9];
 N = 1e4;
 MAX_PROPS = 1;
 DATA_DIMs = [100 100];
