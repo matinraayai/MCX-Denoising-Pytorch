@@ -4,6 +4,7 @@ import numpy as np
 import torchvision.transforms.functional as transforms
 from random import random
 
+
 class OsaDataset(torch.utils.data.Dataset):
     def __init__(self, path: str,
                  input_label: str,

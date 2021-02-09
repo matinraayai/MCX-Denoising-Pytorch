@@ -1,14 +1,12 @@
-function [cw, myimg, cfg] = rand_2d_mcx(nphoton, maxprop, imsize, randseed, srcoffset)
+function [cw, vol, cfg] = rand_2d_mcx(nphoton, maxprop, imsize, randseed, gpu_ids)
 %
-% Format:
-%   [cw, myimg, cfg]=rand_2d_mcx(nphoton, maxprop, imsize, randseed, srcoffset)
-% 
 % Author: Qianqian Fang (q.fang at neu.edu)
 %
 
 cfg.nphoton = nphoton;
+
 if nargin < 2
-    maxprop = 20;
+    maxprop = 1;
 end
 
 if nargin < 3
@@ -25,21 +23,26 @@ if nargin >= 3
 end
 
 if nargin < 5
-    srcoffset = [0 0];
+    gpu_ids = 1;
 end
-%%
-myimg = createrandimg(maxprop - 1, imsize) + 1;
-maxprop = max(myimg(:));
 
-cfg.vol = permute(uint8(myimg), [3, 1, 2]);
+
+vol = random_shape_volume(imsize, maxprop, 5, 50) + 1;
+maxprop = max(vol(:));
+cfg.vol = permute(uint8(vol), [3, 1, 2]);
+
 cfg.issrcfrom0 = 1;
 cfg.srctype = 'isotropic';
 
-cfg.srcpos = [0, rand() * imsize(1) + srcoffset(1), rand() * imsize(2) + srcoffset(2)];
+% Light source positioned so that it doesn't end up inside a media
+cfg.srcpos = [0, randi(imsize(1)), randi(imsize(2))];
+while cfg.vol(1, cfg.srcpos(2) + 1, cfg.srcpos(3) + 1) ~= 1
+    cfg.srcpos = [0, randi(imsize(1)), randi(imsize(2))];
+end
+
 cfg.srcdir = [0, imsize(1) * 0.5 - cfg.srcpos(2),  imsize(2) * 0.5 - cfg.srcpos(3)];
 cfg.srcdir = cfg.srcdir / norm(cfg.srcdir);
-cfg.gpuid = 1;
-% cfg.gpuid='11'; % use two GPUs together
+cfg.gpuid = gpu_ids;
 cfg.autopilot = 1;
 musp = abs(randn(maxprop, 1) + 1);
 g = rand(maxprop, 1);
