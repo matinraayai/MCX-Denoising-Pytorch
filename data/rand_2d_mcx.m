@@ -29,15 +29,17 @@ end
 
 [vol, maxprop] = random_polygon_in_2d_volume(imsize, randi(maxprop), 5, 50);
 vol = vol + 1;
+maxprop = maxprop + 1;
+
 cfg.vol = permute(uint8(vol), [3, 1, 2]);
 
 cfg.issrcfrom0 = 1;
 cfg.srctype = 'isotropic';
 
 % Light source positioned so that it doesn't end up inside a media
-cfg.srcpos = [0, randi(imsize(1)), randi(imsize(2))];
-while cfg.vol(1, cfg.srcpos(2) + 1, cfg.srcpos(3) + 1) ~= 1
-    cfg.srcpos = [0, randi(imsize(1)), randi(imsize(2))];
+cfg.srcpos = [0, rand() * imsize(1), rand() * imsize(2)];
+while cfg.vol(1, round(cfg.srcpos(2)) + 1, round(cfg.srcpos(3)) + 1) ~= 1
+    cfg.srcpos = [0, rand() * imsize(1), rand() * imsize(2)];
 end
 
 cfg.srcdir = [0, imsize(1) * 0.5 - cfg.srcpos(2),  imsize(2) * 0.5 - cfg.srcpos(3)];
