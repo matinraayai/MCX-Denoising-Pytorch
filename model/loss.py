@@ -1,6 +1,8 @@
 import torch
 import torch.nn.functional as F
 from math import exp
+import torch.nn as nn
+from .layers import Vgg19
 
 
 def gaussian(window_size, sigma, device='cpu'):
@@ -39,7 +41,7 @@ def _ssim(img1, img2, window, window_size, channel, size_average=True):
         return ssim_map.mean(1).mean(1).mean(1)
 
 
-class SSIM(torch.nn.Module):
+class SSIM(nn.Module):
     def __init__(self, window_size=11, channel=1, size_average=True):
         super(SSIM, self).__init__()
         self.window_size = window_size
@@ -64,11 +66,39 @@ def ssim(img1, img2, window_size=11, size_average=True):
     return _ssim(img1, img2, window, window_size, channel, size_average)
 
 
+class PSNR(nn.Module):
+    """Peak Signal to Noise Ratio
+    img1 and img2 have range [0, 255]"""
+    def __init__(self):
+        super(PSNR, self).__init__()
+
+    def forward(self, img1, img2):
+        return psnr(img1, img2)
 
 
-# def get_loss(name, **kwargs):
-#     if name == 'l2':
-#         return nn.MSELoss()
-#     if name == 'ssim':
-#
+def psnr(img1, img2):
+    mse = torch.mean((img1 - img2) ** 2)
+    return 20 * torch.log10(255.0 / torch.sqrt(mse))
+
+
+class VGGLoss(nn.Module):
+    def __init__(self):
+        super(VGGLoss, self).__init__()
+        self.vgg = Vgg19()
+        self.criterion = nn.L1Loss()
+        self.weights = [1.0 / 32, 1.0 / 16, 1.0 / 8, 1.0 / 4, 1.0]
+        self.downsample = nn.AvgPool2d(2, stride=2, count_include_pad=False)
+
+    def forward(self, x, y):
+        while x.size()[3] > 1024:
+            x, y = self.downsample(x), self.downsample(y)
+        x_vgg, y_vgg = self.vgg(x), self.vgg(y)
+        loss = 0
+        for i in range(len(x_vgg)):
+            loss += self.weights[i] * self.criterion(x_vgg[i], y_vgg[i].detach())
+        return loss
+
+
+
+
 
