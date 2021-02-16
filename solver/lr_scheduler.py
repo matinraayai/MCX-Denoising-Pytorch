@@ -1,4 +1,4 @@
-# Code adapted from Detectron2(https://github.com/facebookresearch/detectron2)
+# Code adapted from Detectron 2(https://github.com/facebookresearch/detectron2)
 import math
 from bisect import bisect_right
 from typing import List

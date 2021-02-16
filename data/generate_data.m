@@ -2,8 +2,9 @@ clear all;
 % Variables for the script
 PHOTON_LIST = [1e5 1e6 1e7 1e8 1e9];
 N = 1e4;
-MAX_PROPS = 1;
+MAX_PROPS = 2;
 DATA_DIMs = [100 100];
+GPU_IDs = '11';
 % Top level directory
 TOP_FOLDER_NAME = './rand2d';
 if ~exist(TOP_FOLDER_NAME, 'dir')
@@ -34,7 +35,7 @@ for i = 1 : N
         rand_sd = rand_seed(i);
         % Log 10 for creating a variable name to be saved in the mat file.
         label = sprintf("x1e%d", log10(PHOTON_LIST(phtn_count)));
-        [image, ~, ~] = rand_2d_mcx(PHOTON_LIST(phtn_count), MAX_PROPS, DATA_DIMs, rand_sd);
+        [image, ~, ~] = rand_2d_mcx(PHOTON_LIST(phtn_count), MAX_PROPS, DATA_DIMs, rand_sd, GPU_IDs);
         eval(sprintf("%s = image;", label));
         % create the file in the first run since it doesn't exist.
         if phtn_count == 1

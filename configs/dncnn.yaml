@@ -1,0 +1,4 @@
+checkpoint_dir: './dncnn-l2-loss'
+
+model:
+  starting_checkpoint: './dncnn-l2-loss-chkpt/model_chkpt.pt'

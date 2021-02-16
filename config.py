@@ -17,6 +17,8 @@ _C = CfgNode()
 # -----------------------------------------------------------------------------
 _C.model = CfgNode()
 
+_C.model.starting_checkpoint = ''
+
 _C.model.architecture = 'DnCNN'
 
 # DnCNN-specific arguments:
@@ -71,15 +73,21 @@ _C.loss.size_average = True
 # -----------------------------------------------------------------------------
 _C.dataset = CfgNode()
 
-_C.dataset.path = './data/rand2d/{:d}.mat'
+_C.dataset.train_path = './data/rand2d/'
 
-_C.dataset.input_label = 'x1e5'
+_C.dataset.valid_path = './data/rand2d-val/'
+
+_C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
 
 _C.dataset.output_label = 'x1e9'
 
 _C.dataset.dataloader_workers = cpu_count() - 1
 
-_C.dataset.dataset_length = 999
+_C.dataset.max_rotation_angle = 90.
+
+_C.dataset.rotation_p = .7
+
+_C.dataset.flip_p = .5
 
 # -----------------------------------------------------------------------------
 # Solver
@@ -146,6 +154,8 @@ _C.solver.clip_gradients.clip_value = 1.0
 # gradient clipping type; for L-inf, please specify .inf
 _C.solver.clip_gradients.norm_type = 2.0
 
+
+_C.checkpoint_dir = ''
 # # -----------------------------------------------------------------------------
 # # Inference
 # # -----------------------------------------------------------------------------

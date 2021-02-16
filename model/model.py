@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
+from .layers import ResidualBlock
 
 
 # TODO: Despite not being of use for now, play around with the parameters and instantiations to see if we get a better
@@ -85,10 +86,10 @@ class UNet(nn.Module):
 
 class DnCNN(nn.Module):
     def __init__(self, kernel_size=3, padding=1, padding_mode='reflect', input_channels=1, output_channels=1,
-                 inter_kernel_channel=64, num_layers=17, activation_fn=F.relu):
+                 inter_kernel_channel=64, num_layers=17, activation_fn='F.relu'):
         super(DnCNN, self).__init__()
         self.num_layers = num_layers
-        self.activation_fn = activation_fn
+        self.activation_fn = eval(activation_fn)
         self.__setattr__("conv1", nn.Conv2d(input_channels,
                                             inter_kernel_channel,
                                             kernel_size,
@@ -124,10 +125,10 @@ class ResidualDnCNN(nn.Module):
                  kernel_size=3,
                  padding_mode='reflect',
                  padding=1,
-                 num_layers=17, activation_fn=nn.ReLU(inplace=True)):
+                 num_layers=17, activation_fn='nn.ReLU(inplace=True)'):
         super(ResidualDnCNN, self).__init__()
         self.num_layers = num_layers
-        self.activation_fn = activation_fn
+        self.activation_fn = eval(activation_fn)
         self.conv1 = nn.Conv2d(in_channels, intermediate_channels, kernel_size=kernel_size,
                                padding_mode='reflect', padding=padding)
         self.residual_blocks = []
