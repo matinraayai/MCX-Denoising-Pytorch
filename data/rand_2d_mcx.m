@@ -38,9 +38,6 @@ cfg.srctype = 'isotropic';
 
 % Light source positioned so that it doesn't end up inside a media
 cfg.srcpos = [0, rand() * imsize(1), rand() * imsize(2)];
-while cfg.vol(1, round(cfg.srcpos(2)) + 1, round(cfg.srcpos(3)) + 1) ~= 1
-    cfg.srcpos = [0, rand() * imsize(1), rand() * imsize(2)];
-end
 
 cfg.srcdir = [0, imsize(1) * 0.5 - cfg.srcpos(2),  imsize(2) * 0.5 - cfg.srcpos(3)];
 cfg.srcdir = cfg.srcdir / norm(cfg.srcdir);
