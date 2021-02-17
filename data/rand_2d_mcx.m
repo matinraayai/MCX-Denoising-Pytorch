@@ -1,4 +1,4 @@
-function [cw, vol, cfg] = rand_2d_mcx(nphoton, maxprop, imsize, randseed, gpu_ids)
+function [cw, vol, cfg] = rand_2d_mcx(nphoton, minprop, maxprop, imsize, randseed, gpu_ids)
 %
 % Author: Qianqian Fang (q.fang at neu.edu)
 %
@@ -27,7 +27,7 @@ if nargin < 5
 end
 
 
-[vol, maxprop] = random_polygon_in_2d_volume(imsize, randi(maxprop), 5, 50);
+[vol, maxprop] = random_2d_volume(imsize, randi([minprop, maxprop]));
 vol = vol + 1;
 maxprop = maxprop + 1;
 

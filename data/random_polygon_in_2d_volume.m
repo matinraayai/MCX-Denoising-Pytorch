@@ -1,52 +1,5 @@
-function [volume, num_polygons] = random_polygon_in_2d_volume(vol_size, max_num_polygons, max_sides, num_max_attempts)
+function binary_image = random_polygon_in_2d_volume(num_sides, centroid_to_vertex_dist, rows, columns)
 % Starter code from: https://au.mathworks.com/matlabcentral/answers/uploaded_files/201505/shape_recognition_demo1.m
-% Generates a range of shapes in a 2D volume for MCX simulations. Each shape placed inside the volume will have a
-% unique label.
-% For now each shape will have a centroid to vertex distance of between (rows / 8, columns / 8) and
-% (rows / 3, columns / 3) to fit in the volume and not fill in the whole volume.
-% The shapes will also be randomly rotated before being placed in the volume.
-% Parameters:
-%   vol_size: size of the image
-%   max_num_polygons: number of shapes to be put in the volume. Note that this is an upper bound and if the program doesn't
-%   succeed in fitting a shape in the volume, it stops after num_max_attempts loops.
-%   max_sides: maximum number of sides a shape can have
-%   num_max_attempts: maximum number of attempts for each shape before giving up completely
-% Returns:
-%   volume: a 2D volume with each shape having a unique label.
-%   num_polygons: the number of actual shapes that was placed in the volume
-
-rows = vol_size(1);
-columns = vol_size(2);
-volume = zeros(rows, columns);
-
-num_polygons = 0;
-while num_polygons < max_num_polygons
-    overlap = true;
-    num_current_attempts = 0;
-    while overlap && num_current_attempts < num_max_attempts
-        centroid_to_vertex_dist = [randi([round(rows / 8), round(rows / 3)]), randi([round(columns / 8), round(columns / 3)])];
-        num_sides = randi(max_sides - 3) + 3;
-        current_shape_volume = (num_polygons + 1) * create_polygon(num_sides, centroid_to_vertex_dist, rows, columns);
-
-        % Dilating the current shape to ensure it's placed at a good distance from other shapes in the volume
-        dilated_image = imdilate(current_shape_volume, ones(9));
-        % See if any pixels in this binary image overlap any existing pixels.
-        overlap_image = volume & dilated_image;
-        if ~any(overlap_image(:))
-            overlap = false;
-            volume = volume + current_shape_volume;
-        else
-            fprintf('Skipping attempt because of overlap.\n');
-        end
-        num_current_attempts = num_current_attempts + 1;
-    end
-    if num_current_attempts == num_max_attempts
-        break
-    end
-    num_polygons = num_polygons + 1;
-end
-
-function binary_image = create_polygon(num_sides, centroid_to_vertex_dist, rows, columns)
 try
 	% Get the range for the size from the center to the vertices.
 	if length(centroid_to_vertex_dist) > 1
