@@ -12,7 +12,7 @@ def _make_path_list(dir_name):
 
 
 def coin_flip(p_true=0.5):
-    return choice([True, False], [p_true, 1. - p_true])
+    return choice([True, False], p=[p_true, 1. - p_true])
 
 
 class OsaDataset(torch.utils.data.Dataset):
