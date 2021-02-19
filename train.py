@@ -51,7 +51,7 @@ def main():
     train_dataset = OsaDataset(cfg.dataset.train_path, cfg.dataset.input_labels,
                                cfg.dataset.output_label, cfg.dataset.max_rotation_angle,
                                cfg.dataset.rotation_p, cfg.dataset.flip_p)
-    valid_dataset = OsaDataset(cfg.dataset.valid_path, cfg.dataset.input_labels,
+    valid_dataset = OsaDataset(cfg.dataset.valid_path, ['x1e5'],
                                cfg.dataset.output_label, 0., 0., 0.)
     train_dataloader = DataLoader(train_dataset, cfg.solver.batch_size, shuffle=True,
                                   num_workers=cfg.dataset.dataloader_workers,
@@ -79,24 +79,29 @@ def main():
         iterator_valid = tqdm.tqdm(valid_dataloader)
         iterator_valid.set_description(f"Validation Epoch #{epoch_num}")
         total_loss = 0.
-
-        curr_epoch_chkpnt_dir = os.path.join(cfg.checkpoint_dir, str(epoch_num))
-        os.makedirs(curr_epoch_chkpnt_dir)
+        if epoch_num % cfg.solver.iteration_save == 0:
+            curr_epoch_chkpnt_dir = os.path.join(cfg.checkpoint_dir, str(epoch_num))
+            os.makedirs(curr_epoch_chkpnt_dir)
         for i, (x_batch_valid, y_batch_valid) in enumerate(iterator_valid):
             with torch.no_grad():
                 x_batch_valid, y_batch_valid = x_batch_valid.cuda(), y_batch_valid.cuda()
                 logits = model(x_batch_valid)
                 #TODO: Improve this
-                fig, axs = plt.subplots(1, 3)
-                axs[0].imshow(x_batch_valid.squeeze().cpu().numpy())
-                axs[1].imshow(y_batch_valid.squeeze().cpu().numpy())
-                axs[2].imshow(logits.squeeze().cpu().numpy())
-                fig.savefig(os.path.join(curr_epoch_chkpnt_dir, f'{i}.png'))
-                plt.close(fig)
+                if epoch_num % cfg.solver.iteration_save == 0:
+                    fig, axs = plt.subplots(1, 3)
+                    axs[0].imshow(x_batch_valid.squeeze().cpu().numpy())
+                    axs[0].set_title('Input')
+                    axs[1].imshow(y_batch_valid.squeeze().cpu().numpy())
+                    axs[1].set_title('Label')
+                    axs[2].imshow(logits.squeeze().cpu().numpy())
+                    axs[2].set_title('Prediction')
+                    fig.savefig(os.path.join(curr_epoch_chkpnt_dir, f'{i}.png'))
+                    plt.close(fig)
                 loss_value = loss(y_batch_valid, logits)
                 total_loss += loss_value
                 iterator_valid.set_postfix({"Model Loss": "{:.5f}".format(loss_value.item())})
-        torch.save(model, os.path.join(curr_epoch_chkpnt_dir, 'model_chkpt.pt'))
+        if epoch_num % cfg.solver.iteration_save == 0:
+            torch.save(model, os.path.join(curr_epoch_chkpnt_dir, 'model_chkpt.pt'))
         print(f"Validation Loss: {total_loss / len(valid_dataset)}")
 
 

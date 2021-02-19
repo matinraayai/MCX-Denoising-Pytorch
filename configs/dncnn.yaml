@@ -1,4 +1,7 @@
-checkpoint_dir: './dncnn-l2-loss'
+checkpoint_dir: './results/model: DnCNN; Loss: L2; Attempt: 3; Label: All labels'
 
-model:
-  starting_checkpoint: './dncnn-l2-loss-chkpt/model_chkpt.pt'
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+
+#model:
+  #starting_checkpoint: './checkpoint/dncnn-l2-loss-chkpt/model_chkpt.pt'

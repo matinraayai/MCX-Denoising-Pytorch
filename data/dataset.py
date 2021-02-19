@@ -49,4 +49,4 @@ class OsaDataset(torch.utils.data.Dataset):
         return x, y
 
     def __len__(self):
-        return len(self.paths)
+        return len(self.paths) * len(self.input_labels)

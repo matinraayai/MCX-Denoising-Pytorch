@@ -153,7 +153,7 @@ class ResidualDnCNN(nn.Module):
 
 
 class CascadedDnCNNWithUNet(nn.Module):
-    def __init__(self, num_dcnn=3, output_channels=1, num_dcnn_layers=17, activation_fn=F.leaky_relu):
+    def __init__(self, num_dcnn=3, output_channels=1, num_dcnn_layers=17, activation_fn='F.relu'):
         super(CascadedDnCNNWithUNet, self).__init__()
         self.num_dcnn = num_dcnn
         for num in range(self.num_dcnn):

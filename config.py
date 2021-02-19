@@ -103,7 +103,7 @@ _C.solver.lr_scheduler_name = "MultiStepLR"
 _C.solver.iteration_step = 1
 
 # Save a checkpoint after every this number of iterations.
-_C.solver.iteration_save = 5000
+_C.solver.iteration_save = 50
 
 # Whether or not to restart training from iteration 0 regardless
 # of the 'iteration' key in the checkpoint file. This option only
