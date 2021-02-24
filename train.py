@@ -13,10 +13,8 @@ from config import get_cfg_defaults
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Model Training & Inference")
+    parser = argparse.ArgumentParser(description="Model Training")
     parser.add_argument('--config-file', type=str, help='configuration file (yaml)')
-    parser.add_argument('--inference', action='store_true', help='inference mode')
-    parser.add_argument('--checkpoint', type=str, default=None, help='path to load the checkpoint')
     return parser.parse_args()
 
 
@@ -56,7 +54,7 @@ def main():
     train_dataloader = DataLoader(train_dataset, cfg.solver.batch_size, shuffle=True,
                                   num_workers=cfg.dataset.dataloader_workers,
                                   pin_memory=True)
-    valid_dataloader = DataLoader(valid_dataset, 1, shuffle=True,
+    valid_dataloader = DataLoader(valid_dataset, 1, shuffle=False,
                                   num_workers=cfg.dataset.dataloader_workers,
                                   pin_memory=True)
 
@@ -86,7 +84,6 @@ def main():
             with torch.no_grad():
                 x_batch_valid, y_batch_valid = x_batch_valid.cuda(), y_batch_valid.cuda()
                 logits = model(x_batch_valid)
-                #TODO: Improve this
                 if epoch_num % cfg.solver.iteration_save == 0:
                     fig, axs = plt.subplots(1, 3)
                     axs[0].imshow(x_batch_valid.squeeze().cpu().numpy())
