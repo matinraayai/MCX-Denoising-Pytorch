@@ -1,6 +1,9 @@
-function [cw, vol, cfg] = rand_2d_mcx(nphoton, minprop, maxprop, imsize, randseed, gpu_ids)
+function [cw, vol, cfg] = Copy_of_rand_2d_mcx(nphoton, minprop, maxprop, imsize, randseed, gpu_ids)
 %
 % Author: Qianqian Fang (q.fang at neu.edu)
+% Modifications made by Matin Raayai (raayaiardakani.m@northeastern.edu).
+% Produces data as discussed in https://3.basecamp.com/3261719/buckets/447257/todos/1168782879#__recording_1563451251
+% for testing the model.
 %
 
 cfg.nphoton = nphoton;
@@ -42,12 +45,13 @@ cfg.srcdir = [0, imsize(1) * 0.5 - cfg.srcpos(2),  imsize(2) * 0.5 - cfg.srcpos(
 cfg.srcdir = cfg.srcdir / norm(cfg.srcdir);
 cfg.gpuid = gpu_ids;
 cfg.autopilot = 1;
-musp = abs(randn(maxprop, 1) + 1);
-g = rand(maxprop, 1);
-g = zeros(maxprop, 1);
-mus = musp ./ (1 - g);
-myprop = [abs(randn(maxprop, 1) * 0.05 + 0.01), mus, g, rand(maxprop, 1) + 1];
-cfg.prop = [0 0 1 1; myprop];
+
+prop = [0.02, 300, 0.9, 1.37];
+cfg.prop = prop;
+for i = 1 : maxprop - 1
+    cfg.prop = vertcat(cfg.prop, prop);
+end
+cfg.prop = [0.005 1 0 1.37; cfg.prop];
 cfg.tstart = 0;
 cfg.tend = 1e-8;
 cfg.tstep = 1e-8;
