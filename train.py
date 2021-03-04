@@ -52,7 +52,7 @@ def main():
                                cfg.dataset.output_label, cfg.dataset.max_rotation_angle,
                                cfg.dataset.rotation_p, cfg.dataset.flip_p, cfg.dataset.crop_size)
     valid_dataset = OsaDataset(cfg.dataset.valid_path, ['x1e5'],
-                               cfg.dataset.output_label, 0., 0., 0.)
+                               cfg.dataset.output_label, 0., 0., 0., cfg.dataset.crop_size)
     train_dataloader = DataLoader(train_dataset, cfg.solver.batch_size, shuffle=True,
                                   num_workers=cfg.dataset.dataloader_workers,
                                   pin_memory=True)
