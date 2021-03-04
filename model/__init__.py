@@ -1,6 +1,6 @@
 import torch.nn as nn
 from .loss import SSIM, VGGLoss, PSNR
-from .model import UNet, DnCNN, CascadedDnCNNWithUNet, ResidualDnCNN
+from .model import UNet, DnCNN, CascadedDnCNNWithUNet, ResidualDnCNN, DRUNet
 
 
 def get_loss(name, **kwargs):
@@ -22,6 +22,8 @@ def get_model(**kwargs):
     elif model_name == 'dncnn':
         return DnCNN(**kwargs['DnCNN'])
     elif model_name == 'cascaded':
-        return CascadedDnCNNWithUNet()
+        return CascadedDnCNNWithUNet(**kwargs['Cascaded'])
     elif model_name == 'residualdcnn':
         return ResidualDnCNN(**kwargs['ResidualDnCNN'])
+    elif model_name == 'drunet':
+        return DRUNet(**kwargs['DRUNet'])

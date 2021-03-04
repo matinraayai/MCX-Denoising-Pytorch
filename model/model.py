@@ -154,16 +154,16 @@ class ResidualDnCNN(nn.Module):
 
 
 class CascadedDnCNNWithUNet(nn.Module):
-    def __init__(self, num_dcnn=3, output_channels=1, num_dcnn_layers=17, activation_fn='F.relu'):
+    def __init__(self, num_dncnn=3, output_channels=1, num_dncnn_layers=17, activation_fn='F.relu'):
         super(CascadedDnCNNWithUNet, self).__init__()
-        self.num_dcnn = num_dcnn
-        for num in range(self.num_dcnn):
+        self.num_dncnn = num_dncnn
+        for num in range(self.num_dncnn):
             self.__setattr__(f"dncnn{num}", DnCNN(output_channels=output_channels,
-                                                  num_layers=num_dcnn_layers, activation_fn=activation_fn))
+                                                  num_layers=num_dncnn_layers, activation_fn=activation_fn))
         self.unet = UNet()
 
     def forward(self, x):
-        for num in range(self.num_dcnn):
+        for num in range(self.num_dncnn):
             x = self.__getattr__(f"dncnn{num}")(x)
         return self.unet(x)
 

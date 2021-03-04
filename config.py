@@ -48,6 +48,24 @@ _C.model.ResidualDnCNN.inter_kernel_channel = 64
 
 _C.model.ResidualDnCNN.padding_mode = 'reflect'
 
+# Cascaded DnCNN + UNet Specific arguments:
+_C.model.Cascaded = CfgNode()
+
+_C.model.Cascaded.num_dncnn = 1
+
+_C.model.Cascaded.num_dncnn_layers = 17
+
+_C.model.Cascaded.activation_fn = 'F.relu'
+
+# DRUNet Specific arguments:
+_C.model.DRUNet = CfgNode()
+
+_C.model.DRUNet.num_res_blocks = 4
+
+_C.model.DRUNet.res_block_channels = None
+
+_C.model.DRUNet.activation_function = 'F.relu'
+
 # -----------------------------------------------------------------------------
 # Loss Options
 # -----------------------------------------------------------------------------
@@ -159,14 +177,14 @@ _C.checkpoint_dir = ''
 # # -----------------------------------------------------------------------------
 # # Inference
 # # -----------------------------------------------------------------------------
-# _C.INFERENCE = CfgNode()
+_C.inference = CfgNode()
 #
 # _C.INFERENCE.INPUT_SIZE = []
 # _C.INFERENCE.OUTPUT_SIZE = []
 #
 # _C.INFERENCE.INPUT_PATH = ""
 # _C.INFERENCE.IMAGE_NAME = ""
-# _C.INFERENCE.OUTPUT_PATH = ""
+_C.inference.output_dir = "./results/"
 # _C.INFERENCE.OUTPUT_NAME = 'result'
 #
 # _C.INFERENCE.PAD_SIZE = []

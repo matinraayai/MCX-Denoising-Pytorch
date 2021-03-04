@@ -4,7 +4,7 @@ import scipy.io as spio
 import torch
 import numpy as np
 import torchvision.transforms.functional as transforms
-from numpy.random import choice, random
+from numpy.random import choice, random, randint
 
 
 def _make_path_list(dir_name):
@@ -22,6 +22,7 @@ class OsaDataset(torch.utils.data.Dataset):
                  max_rotation_angle: float = 90.,
                  rotation_p: float = .7,
                  flip_p: float = .5,
+                 crop_size: tuple = None
                  ):
         super(OsaDataset, self).__init__()
         assert 0. <= flip_p <= 1.
@@ -32,6 +33,7 @@ class OsaDataset(torch.utils.data.Dataset):
         self.max_rotation_angle = max_rotation_angle
         self.flip_p = flip_p
         self.rotation_p = rotation_p
+        self.crop_size = crop_size
 
     def __getitem__(self, item):
         mat_file = spio.loadmat(self.paths[item // len(self.input_labels)], squeeze_me=True)
@@ -46,6 +48,11 @@ class OsaDataset(torch.utils.data.Dataset):
                 x, y = transforms.hflip(x), transforms.hflip(y)
             else:
                 x, y = transforms.vflip(x), transforms.vflip(y)
+        if self.crop_size is not None:
+            assert self.crop_size[0] < x.shape[0] and self.crop_size[1] < x.shape[1]
+            starting_pos = randint(x.shape[0] - self.crop_size[0]), randint(x.shape[1] - self.crop_size[1])
+            x = x[starting_pos[0]: self.crop_size[0], starting_pos[1]: self.crop_size[1]]
+            y = y[starting_pos[0]: self.crop_size[0], starting_pos[1]: self.crop_size[1]]
         return x, y
 
     def __len__(self):

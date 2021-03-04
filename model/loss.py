@@ -54,7 +54,8 @@ class SSIM(nn.Module):
         _, channel1, _, _ = img1.size()
         _, channel2, _, _ = img2.size()
         assert self.channel == channel1 == channel2
-
+        if img1.device != self.window.device:
+            self.window = self.window.to(img1.device)
         return _ssim(img1, img2, self.window, self.window_size, self.channel, self.size_average)
 
 

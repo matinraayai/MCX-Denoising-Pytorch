@@ -39,20 +39,17 @@ def main():
 
     matplotlib.use('Agg')
     model = get_model(**cfg.model).cuda()
-    state_dict = torch.load(cfg.model.starting_checkpoint)
+    state_dict = torch.load(args.checkpoint)
     model.load_state_dict(state_dict.state_dict())
 
     mse_criterion = nn.MSELoss()
     mse_loss = 0.
 
-    ssim_criterion = SSIM(cfg.loss.ssim).cuda()
+    ssim_criterion = SSIM(**cfg.loss.ssim).cuda()
     ssim_loss = 0.
 
     psnr_criterion = PSNR()
     psnr_loss = 0.
-
-    vgg_criterion = VGGLoss().cuda()
-    vgg_loss = 0.
 
     test_dataset = OsaDataset(cfg.dataset.valid_path, ['x1e5'], cfg.dataset.output_label, 0., 0., 0.)
     test_dataloader = DataLoader(test_dataset, 1, shuffle=False,
@@ -64,7 +61,7 @@ def main():
     iterator_test = tqdm.tqdm(test_dataloader)
     iterator_test.set_description(f"Test Progress")
     test_output_dir = os.path.join(cfg.inference.output_dir)
-    os.makedirs(test_output_dir)
+    os.makedirs(test_output_dir, exist_ok=True)
     for i, (x_test, y_test) in enumerate(iterator_test):
         with torch.no_grad():
             x_test, y_test = x_test.cuda(), y_test.cuda()
@@ -72,8 +69,8 @@ def main():
             # Loss Updates
             mse_loss += mse_criterion(y_test, logits)
             ssim_loss += ssim_criterion(y_test, logits)
-            psnr_loss += psnr_criterion(y_test, logits)
-            vgg_loss += vgg_criterion(y_test, logits)
+            psnr_loss += psnr_criterion(x_test, logits)
+            # vgg_loss += vgg_criterion(y_test, logits)
 
             fig, axs = plt.subplots(1, 3)
             axs[0].imshow(x_test.squeeze().cpu().numpy())
@@ -85,11 +82,12 @@ def main():
             fig.savefig(os.path.join(test_output_dir, f'{i}.png'))
             plt.close(fig)
 
-        print(f"Summary:\n"
-              f"Mean MSE Loss: {mse_loss / len(test_dataset)}"
-              f"Mean SSIM Loss: {ssim_loss / len(test_dataset)}"
-              f"Mean PSNR Loss: {psnr_loss / len(test_dataset)}"
-              f"Mean VGG Loss: {vgg_loss / len(test_dataset)}")
+    print(f"Summary:\n"
+          f"Mean MSE Loss: {mse_loss / len(test_dataset)}"
+          f"Mean SSIM Loss: {ssim_loss / len(test_dataset)}"
+          f"Mean PSNR Loss: {psnr_loss / len(test_dataset)}"
+          # f"Mean VGG Loss: {vgg_loss / len(test_dataset)}")
+          )
 
 
 if __name__ == '__main__':

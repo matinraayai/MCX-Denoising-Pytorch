@@ -13,13 +13,12 @@ from config import get_cfg_defaults
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Model Training")
+    parser = argparse.ArgumentParser(description="De-noising model training script")
     parser.add_argument('--config-file', type=str, help='configuration file (yaml)')
     return parser.parse_args()
 
 
 def main():
-    r"""Main function."""
     # arguments
     args = get_args()
 
@@ -37,11 +36,14 @@ def main():
     print(cfg)
 
     matplotlib.use('Agg')
+
     model = get_model(**cfg.model).cuda()
     if cfg.model.starting_checkpoint:
         state_dict = torch.load(cfg.model.starting_checkpoint)
         model.load_state_dict(state_dict.state_dict())
+
     optimizer = build_optimizer(cfg, model)
+
     lr_scheduler = build_lr_scheduler(cfg, optimizer)
 
     loss = Criterion(**cfg.loss)
