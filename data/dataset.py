@@ -49,10 +49,13 @@ class OsaDataset(torch.utils.data.Dataset):
             else:
                 x, y = transforms.vflip(x), transforms.vflip(y)
         if self.crop_size is not None:
-            assert self.crop_size[0] < x.shape[0] and self.crop_size[1] < x.shape[1]
-            starting_pos = randint(x.shape[0] - self.crop_size[0]), randint(x.shape[1] - self.crop_size[1])
-            x = x[starting_pos[0]: self.crop_size[0], starting_pos[1]: self.crop_size[1]]
-            y = y[starting_pos[0]: self.crop_size[0], starting_pos[1]: self.crop_size[1]]
+            assert self.crop_size[0] < x.shape[1] and self.crop_size[1] < x.shape[2]
+            starting_pos = randint(0, x.shape[1] - self.crop_size[0]), randint(0, x.shape[2] - self.crop_size[1])
+            # starting_pos = 0, 0
+            x = x[:, starting_pos[0]: starting_pos[0] + self.crop_size[0],
+                     starting_pos[1]: starting_pos[1] + self.crop_size[1]]
+            y = y[:, starting_pos[0]: starting_pos[0] + self.crop_size[0],
+                     starting_pos[1]: starting_pos[1] + self.crop_size[1]]
         return x, y
 
     def __len__(self):

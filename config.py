@@ -105,6 +105,8 @@ _C.dataset.max_rotation_angle = 90.
 
 _C.dataset.rotation_p = .7
 
+_C.dataset.crop_size = None
+
 _C.dataset.flip_p = .5
 
 # -----------------------------------------------------------------------------

@@ -1,7 +1,12 @@
 checkpoint_dir: './results/model: DRUNet; Loss: L2; Attempt: 1; Label: All labels'
 
+model:
+  architecture: 'DRUNet'
+
 dataset:
   input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  crop_size: (96, 96)
 
 solver:
-  batch_size: 16
+  batch_size: 8
+  base_lr: 1e-5
