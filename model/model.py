@@ -130,7 +130,7 @@ class ResidualDnCNN(nn.Module):
         self.num_layers = num_layers
         self.activation_fn = eval(activation_fn)
         self.conv1 = nn.Conv2d(in_channels, intermediate_channels, kernel_size=kernel_size,
-                               padding_mode='reflect', padding=padding)
+                               padding_mode=padding_mode, padding=padding)
         self.residual_blocks = []
         for num_layer in range(2, num_layers):
             self.residual_blocks.append(ResidualBlock(in_channels=intermediate_channels,
@@ -138,6 +138,7 @@ class ResidualDnCNN(nn.Module):
                                                       kernel_size=kernel_size,
                                                       padding_mode=padding_mode,
                                                       padding=padding,
+                                                      dilation=0,
                                                       activation_fn=activation_fn))
         self.residual_blocks = nn.Sequential(*self.residual_blocks)
         self.__setattr__(f"conv{num_layers}", nn.Conv2d(intermediate_channels, out_channels,
@@ -165,3 +166,56 @@ class CascadedDnCNNWithUNet(nn.Module):
         for num in range(self.num_dcnn):
             x = self.__getattr__(f"dncnn{num}")(x)
         return self.unet(x)
+
+
+class DRUNet(nn.Module):
+    def __init__(self, in_nc=1, out_nc=1,
+                 res_block_channels=None,
+                 num_res_blocks=4, activation_function='F.relu'):
+        super(DRUNet, self).__init__()
+        if res_block_channels is None:
+            res_block_channels = [64, 128, 256, 512]
+        self.m_head = nn.Conv2d(in_nc, res_block_channels[0], bias=False, kernel_size=3, stride=1, padding=1)
+
+        activation_function = eval(activation_function)
+
+        def downsample_block(in_channels, out_channels):
+            module = [ResidualBlock(in_channels, in_channels, activation_fn=activation_function)
+                      for _ in range(num_res_blocks)]
+            module += [nn.Conv2d(in_channels, out_channels, kernel_size=2, stride=2, bias=False)]
+            return nn.Sequential(*module)
+
+        self.m_down1 = downsample_block(res_block_channels[0], res_block_channels[1])
+
+        self.m_down2 = downsample_block(res_block_channels[1], res_block_channels[2])
+
+        self.m_down3 = downsample_block(res_block_channels[2], res_block_channels[3])
+
+        self.m_body = [ResidualBlock(res_block_channels[3], res_block_channels[3]) for _ in range(num_res_blocks)]
+
+        self.m_body = nn.Sequential(*self.m_body)
+
+        def upsample_block(in_channels, out_channels):
+            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=2, stride=2)]
+            module += [ResidualBlock(out_channels, out_channels) for _ in range(num_res_blocks)]
+            return nn.Sequential(*module)
+
+        self.m_up3 = upsample_block(res_block_channels[3], res_block_channels[2])
+
+        self.m_up2 = upsample_block(res_block_channels[2], res_block_channels[1])
+
+        self.m_up1 = upsample_block(res_block_channels[1], res_block_channels[0])
+
+        self.m_tail = nn.Conv2d(res_block_channels[0], out_nc, bias=False, kernel_size=3, stride=1, padding=1)
+
+    def forward(self, x0):
+        x1 = self.m_head(x0)
+        x2 = self.m_down1(x1)
+        x3 = self.m_down2(x2)
+        x4 = self.m_down3(x3)
+        x = self.m_body(x4)
+        x = self.m_up3(x + x4)
+        x = self.m_up2(x + x3)
+        x = self.m_up1(x + x2)
+        x = self.m_tail(x + x1)
+        return x
