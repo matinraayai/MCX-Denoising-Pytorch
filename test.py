@@ -2,7 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from data.dataset import OsaDataset
-from model import get_model
+from model.builder import get_model
 import argparse
 import tqdm
 import matplotlib
@@ -33,11 +33,14 @@ def compute_mid_cross_section_stats(fluence_maps: torch.Tensor):
     y_axis_len = fluence_maps.shape[2]
     cross_section = torch.zeros((num_samples, y_axis_len), dtype=torch.float32)
     for i in range(num_samples):
-        cross_section[i, :] = fluence_maps[i, fluence_maps.shape[1] // 2, :]
-    means = cross_section.mean(dim=0)
-    stds = cross_section.std(dim=0)
-    snr_results = 20 * torch.log10(means / stds)
-    return {'means': torch.log10(means), 'stds': torch.log10(stds), 'snr': snr_results}
+        # cross_section[i, :] = fluence_maps[i, fluence_maps.shape[1] // 2, :]
+        cross_section[i, :] = fluence_maps[i, 90, :]
+    means = cross_section.mean(dim=0).log10()
+    stds = cross_section.std(dim=0).log10()
+    # means[means != means] = 0
+    # stds[stds != stds] = 0
+    snr_results = 20 * (means - stds)
+    return {'means': means, 'stds': means, 'snr': snr_results}
 
 
 def visualize(x, y, prediction, output_path, matplotlib_backend='Agg'):
@@ -62,21 +65,23 @@ def plot_stats(simulation_stats, prediction_states, output_dir, matplotlib_backe
         plt.plot(x_values, simulation_curve, color=color, label=label)
         if label in prediction_states:
             prediction_curve = prediction_states[label][stat_name]
-            plt.plot(x_values, prediction_curve, color=color, linestyle='dashed')
+            plt.plot(x_values, prediction_curve, color=color, linestyle='dashed', label=label + "_pred")
 
-    def create_stat_plot(stat_name):
-        c_map = plt.cm.get_cmap('hsv', 30)
+    def create_stat_plot(stat_name, x_axis_label, y_axis_label):
+        c_map = plt.cm.get_cmap('hsv', 10)
         i = 0
         for label in simulation_stats.keys():
             add_label_to_stat_plot(label, stat_name, c_map(i))
             i += 1
         plt.legend()
+        plt.xlabel(x_axis_label)
+        plt.ylabel(y_axis_label)
         plt.savefig(os.path.join(output_dir, f'{stat_name}.png'))
         plt.close()
 
-    create_stat_plot('snr')
-    create_stat_plot('means')
-    create_stat_plot('stds')
+    create_stat_plot('snr', 'Cross Section X (mm)', 'SNR (DBs)')
+    create_stat_plot('means', 'Cross Section X (mm)', 'Mean W/mm^2')
+    create_stat_plot('stds', 'Cross Section X (mm)', 'STD ΔW/mm^2')
 
 
 def main():
@@ -164,8 +169,10 @@ def main():
     print("SNR improvements")
     for label in simulation_stats:
         if label != cfg.dataset.output_label:
+
             diff = prediction_stats[label]['snr'] - simulation_stats[label]['snr']
-            diff_nonzero = diff[diff > 0.5]
+            diff_nonzero = diff[0.5 < diff]
+            # print(prediction_stats[label]['snr'], simulation_stats[label]['snr'])
             snr_improvement = diff.mean()
             snr_improvement_non_zero = diff_nonzero.mean()
             print(f"{label}: SNR improvement: {snr_improvement}, Non-zero SNR improvement: {snr_improvement_non_zero}")

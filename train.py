@@ -2,8 +2,7 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from data.dataset import OsaDataset
-from model import get_model
-from model.builder import Criterion
+from model.builder import Criterion, get_model
 from solver.builder import build_optimizer, build_lr_scheduler
 import argparse
 import tqdm
