@@ -93,4 +93,7 @@ class OsaDataset(torch.utils.data.Dataset):
             return self.__getitem_test(item)
 
     def __len__(self):
-        return len(self.paths) * len(self.input_labels)
+        if self.is_train:
+            return len(self.paths) * len(self.input_labels)
+        else:
+            return len(self.paths)
