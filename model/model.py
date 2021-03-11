@@ -121,7 +121,7 @@ class DnCNN(nn.Module):
 
 class ResidualDnCNN(nn.Module):
     def __init__(self, in_channels=1, out_channels=1,
-                 intermediate_channels=128,
+                 inter_kernel_channel=128,
                  kernel_size=3,
                  padding_mode='reflect',
                  padding=1,
@@ -129,19 +129,19 @@ class ResidualDnCNN(nn.Module):
         super(ResidualDnCNN, self).__init__()
         self.num_layers = num_layers
         self.activation_fn = eval(activation_fn)
-        self.conv1 = nn.Conv2d(in_channels, intermediate_channels, kernel_size=kernel_size,
+        self.conv1 = nn.Conv2d(in_channels, inter_kernel_channel, kernel_size=kernel_size,
                                padding_mode=padding_mode, padding=padding)
         self.residual_blocks = []
         for num_layer in range(2, num_layers):
-            self.residual_blocks.append(ResidualBlock(in_channels=intermediate_channels,
-                                                      out_channels=intermediate_channels,
+            self.residual_blocks.append(ResidualBlock(in_channels=inter_kernel_channel,
+                                                      out_channels=inter_kernel_channel,
                                                       kernel_size=kernel_size,
                                                       padding_mode=padding_mode,
                                                       padding=padding,
-                                                      dilation=0,
-                                                      activation_fn=activation_fn))
+                                                      dilation=1,
+                                                      activation_fn=self.activation_fn))
         self.residual_blocks = nn.Sequential(*self.residual_blocks)
-        self.__setattr__(f"conv{num_layers}", nn.Conv2d(intermediate_channels, out_channels,
+        self.__setattr__(f"conv{num_layers}", nn.Conv2d(inter_kernel_channel, out_channels,
                                                         kernel_size,
                                                         padding_mode=padding_mode, padding=padding))
 

@@ -24,7 +24,7 @@ def get_model(**kwargs):
         return DnCNN(**kwargs['DnCNN'])
     elif model_name == 'cascaded':
         return CascadedDnCNNWithUNet(**kwargs['Cascaded'])
-    elif model_name == 'residualdcnn':
+    elif model_name == 'residualdncnn':
         return ResidualDnCNN(**kwargs['ResidualDnCNN'])
     elif model_name == 'drunet':
         return DRUNet(**kwargs['DRUNet'])

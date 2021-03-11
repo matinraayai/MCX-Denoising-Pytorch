@@ -83,7 +83,7 @@ def main():
             os.makedirs(curr_epoch_chkpt_dir, exist_ok=True)
         for i, (x_batch_valid, y_batch_valid) in enumerate(iterator_valid):
             with torch.no_grad():
-                x_batch_valid, y_batch_valid = x_batch_valid.cuda(), y_batch_valid.cuda()
+                x_batch_valid, y_batch_valid = x_batch_valid['x1e5'].cuda(), y_batch_valid.cuda()
                 batch_prediction = model(x_batch_valid)
                 if epoch_num % cfg.solver.iteration_save == 0:
                     fig, axs = plt.subplots(1, 3)
