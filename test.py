@@ -10,37 +10,42 @@ import matplotlib.pyplot as plt
 from config import get_cfg_defaults
 from model.loss import PSNR, SSIM
 import torch.nn as nn
+from time import time
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="Model Inference")
     parser.add_argument('--config-file', type=str, help='configuration file (yaml)')
     parser.add_argument('--checkpoint', type=str, default=None, help='path to load the checkpoint')
+    parser.add_argument('--cross-section', type=int, default=None, help='Cross section to calculate the SNR plot')
     return parser.parse_args()
 
 
-def compute_mid_cross_section_stats(fluence_maps: torch.Tensor):
+def compute_mid_cross_section_stats(fluence_maps: torch.Tensor, x_cross_section=None):
     """
     https://3.basecamp.com/3261719/buckets/447257/todos/1194253648#__recording_1236125346
-    Computes the SNR, log10 of mean and log10 of std over the middle cross section on the x-axis of the input.
+    Computes the SNR, log10 of mean and log10 of std over a cross section on the x-axis of the input.
     The input tensor contains a stack of an identical 2D simulation domain.
     :param fluence_maps: a 3D array in shape of [num_samples, x_axis, y_axis], that has stacked all the simulations
     of the same domain over the first dimension of the tensor.
+    :param x_cross_section: Cross section to analyse
     :return: a dict containing the means, STDs and SNR stats over the middle of the x_axis. Each output will be a
     vector of shape [num_samples, y_axis].
     """
     num_samples = fluence_maps.shape[0]
     y_axis_len = fluence_maps.shape[2]
     cross_section = torch.zeros((num_samples, y_axis_len), dtype=torch.float32)
+    if x_cross_section is None:
+        x_cross_section = fluence_maps.shape[1] // 2
     for i in range(num_samples):
         # cross_section[i, :] = fluence_maps[i, fluence_maps.shape[1] // 2, :]
-        cross_section[i, :] = fluence_maps[i, 90, :]
+        cross_section[i, :] = fluence_maps[i, x_cross_section, :]
     means = cross_section.mean(dim=0).log10()
     stds = cross_section.std(dim=0).log10()
     # means[means != means] = 0
     # stds[stds != stds] = 0
     snr_results = 20 * (means - stds)
-    return {'means': means, 'stds': means, 'snr': snr_results}
+    return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
 def visualize(x, y, prediction, output_path, matplotlib_backend='Agg'):
@@ -56,7 +61,7 @@ def visualize(x, y, prediction, output_path, matplotlib_backend='Agg'):
     plt.close(fig)
 
 
-def plot_stats(simulation_stats, prediction_states, output_dir, matplotlib_backend='Agg'):
+def plot_stats(simulation_stats, prediction_states, x_cross_section, output_dir, matplotlib_backend='Agg'):
     matplotlib.use(matplotlib_backend)
 
     def add_label_to_stat_plot(label, stat_name, color):
@@ -79,9 +84,9 @@ def plot_stats(simulation_stats, prediction_states, output_dir, matplotlib_backe
         plt.savefig(os.path.join(output_dir, f'{stat_name}.png'))
         plt.close()
 
-    create_stat_plot('snr', 'Cross Section X (mm)', 'SNR (DBs)')
-    create_stat_plot('means', 'Cross Section X (mm)', 'Mean W/mm^2')
-    create_stat_plot('stds', 'Cross Section X (mm)', 'STD ΔW/mm^2')
+    create_stat_plot('snr', f'Y over Cross Section at {x_cross_section} (mm)', 'SNR (DBs)')
+    create_stat_plot('means', f'Y over Cross Section at {x_cross_section} (mm)', 'Mean W/mm^2')
+    create_stat_plot('stds', f'Y over Cross Section at {x_cross_section} (mm)', 'STD ΔW/mm^2')
 
 
 def main():
@@ -135,7 +140,9 @@ def main():
         y_test = y_test.cuda()
         with torch.no_grad():
             for label, x_test in x_tests.items():
+                start = time()
                 prediction = model(x_test)
+                end = time()
                 # Loss Updates
                 mse_loss += mse_criterion(prediction, y_test)
                 ssim_loss += ssim_criterion(prediction, y_test)
@@ -148,6 +155,7 @@ def main():
                           y_test.squeeze().cpu().numpy(),
                           prediction.squeeze().cpu().numpy(),
                           os.path.join(test_output_dir, f'{i}_{label}.png'))
+                iterator_test.set_postfix({"Inf. time": "{:.5f}".format(end - start)})
             # Append label to stats
             simulations[cfg.dataset.output_label].append(y_test)
 
@@ -157,7 +165,9 @@ def main():
     simulation_stats = {label: compute_mid_cross_section_stats(simulation) for label, simulation in simulations.items()}
     prediction_stats = {label: compute_mid_cross_section_stats(prediction) for label, prediction in predictions.items()}
 
-    plot_stats(simulation_stats, prediction_stats, cfg.inference.output_dir)
+    if args.cross_section is None:
+        args.cross_section = 'Middle'
+    plot_stats(simulation_stats, prediction_stats, args.cross_section, cfg.inference.output_dir)
 
     print(f"Metrics:",
           f"Mean MSE Loss: {mse_loss / len(test_dataset)}",
@@ -171,8 +181,8 @@ def main():
         if label != cfg.dataset.output_label:
 
             diff = prediction_stats[label]['snr'] - simulation_stats[label]['snr']
-            diff_nonzero = diff[0.5 < diff]
-            # print(prediction_stats[label]['snr'], simulation_stats[label]['snr'])
+            # diff_nonzero = diff[0.5 < diff]
+            diff_nonzero = diff[45:]
             snr_improvement = diff.mean()
             snr_improvement_non_zero = diff_nonzero.mean()
             print(f"{label}: SNR improvement: {snr_improvement}, Non-zero SNR improvement: {snr_improvement_non_zero}")
