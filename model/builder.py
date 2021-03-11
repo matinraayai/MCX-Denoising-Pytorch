@@ -4,7 +4,7 @@ Borrowed from https://github.com/zudi-lin/pytorch_connectomics/
 """
 import torch
 import torch.nn as nn
-
+from .model import UNet, CascadedDnCNNWithUNet, DRUNet, DnCNN, ResidualDnCNN
 from .loss import SSIM, PSNR, VGGLoss
 
 
@@ -16,6 +16,19 @@ def get_regularizer(reg_opts=()):
                 regularizers.append(nn.L1Loss())
     return nn.Sequential(*regularizers)
 
+def get_model(**kwargs):
+    model_name = kwargs['architecture'].lower()
+    if model_name == 'unet':
+        return UNet(**kwargs['UNet'])
+    elif model_name == 'dncnn':
+        return DnCNN(**kwargs['DnCNN'])
+    elif model_name == 'cascaded':
+        return CascadedDnCNNWithUNet(**kwargs['Cascaded'])
+    elif model_name == 'residualdcnn':
+        return ResidualDnCNN(**kwargs['ResidualDnCNN'])
+    elif model_name == 'drunet':
+        return DRUNet(**kwargs['DRUNet'])
+
 
 def get_loss(loss_opt=(), **kwargs):
     out = []
@@ -23,6 +36,8 @@ def get_loss(loss_opt=(), **kwargs):
         opt = opt.lower()
         if opt == 'mse':
             out.append(nn.MSELoss())
+        elif opt == 'mae':
+            out.append(nn.L1Loss())
         elif opt == 'ssim':
             out.append(SSIM(kwargs['ssim']))
         elif opt == 'psnr':
