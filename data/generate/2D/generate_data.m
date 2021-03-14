@@ -6,6 +6,7 @@ MAX_NUM_PROPS = 10;
 MIN_NUM_PROPS= 2;
 DATA_DIMs = [100 100];
 GPU_IDs = '11';
+IS_TRAIN = true;
 % Top level directory
 TOP_FOLDER_NAME = './rand2d';
 
@@ -17,11 +18,14 @@ addpath('./mcxlab');
 
 % Generate new unique random seed for Monte Carlo simulation
 is_seed_unique = 1;
-while is_seed_unique ~= 0
-    rand_seed = randi([1 2^31 - 1], 1, N);
-    is_seed_unique = length(unique(rand_seed)) < length(rand_seed);
+if IS_TRAIN
+    while is_seed_unique ~= 0
+        rand_seed = randi([1 2^31 - 1], 1, N);
+        is_seed_unique = length(unique(rand_seed)) < length(rand_seed);
+    end
+else
+    rand_seed = randi(intmax) * ones(N);
 end
-
 
 file_id = 0;
 for i = 1 : N

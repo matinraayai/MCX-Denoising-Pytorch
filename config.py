@@ -91,9 +91,9 @@ _C.loss.size_average = True
 # -----------------------------------------------------------------------------
 _C.dataset = CfgNode()
 
-_C.dataset.train_path = './data/rand2d/'
+_C.dataset.train_path = 'data/rand2d/train/'
 
-_C.dataset.valid_path = './data/rand2d-val/'
+_C.dataset.valid_path = 'data/rand2d/validation/'
 
 _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
 
@@ -237,3 +237,13 @@ def save_all_cfg(cfg, output_dir):
     with open(path, "w") as f:
         f.write(cfg.dump())
     print("Full config saved to {}".format(path))
+
+
+def read_cfg_file(config_file_path):
+    # configurations
+    cfg = get_cfg_defaults()
+    cfg.update()
+    cfg.merge_from_file(config_file_path)
+
+    cfg.freeze()
+    return cfg

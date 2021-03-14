@@ -178,7 +178,7 @@ class DRUNet(nn.Module):
         self.m_head = nn.Conv2d(in_nc, res_block_channels[0], bias=False, kernel_size=3, stride=1, padding=1)
 
         activation_function = eval(activation_function)
-
+        self.activation_fn = activation_function
         def downsample_block(in_channels, out_channels):
             module = [ResidualBlock(in_channels, in_channels, activation_fn=activation_function)
                       for _ in range(num_res_blocks)]
@@ -196,8 +196,67 @@ class DRUNet(nn.Module):
         self.m_body = nn.Sequential(*self.m_body)
 
         def upsample_block(in_channels, out_channels):
-            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=2, stride=2)]
-            module += [ResidualBlock(out_channels, out_channels) for _ in range(num_res_blocks)]
+            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=3)]
+            module += [nn.ReLU(inplace=True)]
+            module += [ResidualBlock(out_channels, out_channels, activation_fn=activation_function)
+                       for _ in range(num_res_blocks)]
+            return nn.Sequential(*module)
+
+        self.m_up3 = upsample_block(res_block_channels[3], res_block_channels[2])
+
+        self.m_up2 = upsample_block(res_block_channels[2], res_block_channels[1])
+
+        self.m_up1 = upsample_block(res_block_channels[1], res_block_channels[0])
+
+        self.m_tail = nn.Conv2d(res_block_channels[0], out_nc, bias=False, kernel_size=3, stride=1, padding=1)
+
+    def forward(self, x0):
+        x1 = self.activation_fn(self.m_head(x0))
+        x2 = self.activation_fn(self.m_down1(x1))
+        x3 = self.activation_fn(self.m_down2(x2))
+        x4 = self.activation_fn(self.m_down3(x3))
+        x = self.m_body(x4)
+        x = self.m_up3(x + x4)
+        x = self.m_up2(x + x3)
+        x = self.m_up1(x + x2)
+        x = self.m_tail(x + x1)
+        return x
+
+
+class HUNet(nn.Module):
+    def __init__(self, in_nc=1, out_nc=1,
+                 res_block_channels=None,
+                 num_conv_blocks=4, activation_function='F.relu'):
+        super(HUNet, self).__init__()
+        if res_block_channels is None:
+            res_block_channels = [64, 128, 256, 512]
+        self.m_head = nn.Conv2d(in_nc, res_block_channels[0], bias=False, kernel_size=3, stride=1, padding=1)
+
+        activation_function = eval(activation_function)
+
+        def downsample_block(in_channels, out_channels):
+            module = [nn.Sequential(
+                      nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1, padding_mode='reflect'),
+                      nn.ReLU(inplace=True)) for _ in range(num_conv_blocks)]
+            module += [nn.Conv2d(in_channels, out_channels, kernel_size=3, bias=False)]
+            return nn.Sequential(*module)
+
+        self.m_down1 = downsample_block(res_block_channels[0], res_block_channels[1])
+
+        self.m_down2 = downsample_block(res_block_channels[1], res_block_channels[2])
+
+        self.m_down3 = downsample_block(res_block_channels[2], res_block_channels[3])
+
+        self.m_body = [ResidualBlock(res_block_channels[3], res_block_channels[3]) for _ in range(num_conv_blocks)]
+
+        self.m_body = nn.Sequential(*self.m_body)
+
+        def upsample_block(in_channels, out_channels):
+            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=2, stride=2),
+                      nn.ReLU(inplace=True)]
+            module += [nn.Sequential(
+                      nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1, padding_mode='reflect'),
+                      nn.ReLU(inplace=True)) for _ in range(num_conv_blocks)]
             return nn.Sequential(*module)
 
         self.m_up3 = upsample_block(res_block_channels[3], res_block_channels[2])
@@ -213,9 +272,7 @@ class DRUNet(nn.Module):
         x2 = self.m_down1(x1)
         x3 = self.m_down2(x2)
         x4 = self.m_down3(x3)
-        x = self.m_body(x4)
-        x = self.m_up3(x + x4)
-        x = self.m_up2(x + x3)
+        x = self.m_up2(x4 + x3)
         x = self.m_up1(x + x2)
         x = self.m_tail(x + x1)
         return x
