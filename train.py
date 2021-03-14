@@ -6,9 +6,10 @@ from model.builder import Criterion, get_model
 from solver.builder import build_optimizer, build_lr_scheduler
 import argparse
 import tqdm
-import matplotlib
-import matplotlib.pyplot as plt
-from config import get_cfg_defaults
+from model.loss import SSIM, PSNR
+import torch.nn as nn
+from config import read_cfg_file
+from utils import visualize
 
 
 def get_args():
@@ -25,16 +26,9 @@ def main():
     print(args)
 
     # configurations
-    cfg = get_cfg_defaults()
-    cfg.update()
-
-    cfg.merge_from_file(args.config_file)
-
-    cfg.freeze()
+    cfg = read_cfg_file(args.config_file)
     print("Configuration details:")
     print(cfg)
-
-    matplotlib.use('Agg')
 
     model = get_model(**cfg.model).cuda()
     if cfg.model.starting_checkpoint:
@@ -47,6 +41,12 @@ def main():
 
     loss = Criterion(**cfg.loss)
 
+    mse_criterion = nn.MSELoss()
+
+    ssim_criterion = SSIM(**cfg.loss.ssim).cuda()
+
+    psnr_criterion = PSNR()
+
     train_dataset = OsaDataset(cfg.dataset.train_path, cfg.dataset.input_labels,
                                cfg.dataset.output_label, True, cfg.dataset.crop_size, cfg.dataset.max_rotation_angle,
                                cfg.dataset.rotation_p, cfg.dataset.flip_p)
@@ -58,7 +58,7 @@ def main():
     valid_dataloader = DataLoader(valid_dataset, 1, shuffle=False,
                                   num_workers=cfg.dataset.dataloader_workers,
                                   pin_memory=True)
-
+    # Training
     for epoch_num in range(cfg.solver.total_iterations):
         model.train()
         iterator = tqdm.tqdm(train_dataloader)
@@ -74,6 +74,7 @@ def main():
                 optimizer.step()
             iterator.set_postfix({"Batch Model Loss": "{:.5f}".format(loss_value.item())})
         lr_scheduler.step()
+        # Validation
         model.train(False)
         iterator_valid = tqdm.tqdm(valid_dataloader)
         iterator_valid.set_description(f"Validation Epoch #{epoch_num}")
@@ -81,26 +82,36 @@ def main():
         if epoch_num % cfg.solver.iteration_save == 0:
             curr_epoch_chkpt_dir = os.path.join(cfg.checkpoint_dir, str(epoch_num))
             os.makedirs(curr_epoch_chkpt_dir, exist_ok=True)
+        total_mse_loss = 0.
+        total_ssim_loss = 0.
+        total_psnr_loss = 0.
         for i, (x_batch_valid, y_batch_valid) in enumerate(iterator_valid):
             with torch.no_grad():
                 x_batch_valid, y_batch_valid = x_batch_valid['x1e5'].cuda(), y_batch_valid.cuda()
                 batch_prediction = model(x_batch_valid)
-                if epoch_num % cfg.solver.iteration_save == 0:
-                    fig, axs = plt.subplots(1, 3)
-                    axs[0].imshow(x_batch_valid.squeeze().cpu().numpy())
-                    axs[0].set_title('Input')
-                    axs[1].imshow(y_batch_valid.squeeze().cpu().numpy())
-                    axs[1].set_title('Label')
-                    axs[2].imshow(batch_prediction.squeeze().cpu().numpy())
-                    axs[2].set_title('Prediction')
-                    fig.savefig(os.path.join(curr_epoch_chkpt_dir, f'{i}.png'))
-                    plt.close(fig)
+                if epoch_num % cfg.solver.iteration_save  == 0:
+                    visualize(x_batch_valid.squeeze().cpu(),
+                              y_batch_valid.squeeze().cpu(),
+                              batch_prediction.squeeze().cpu(),
+                              os.path.join(curr_epoch_chkpt_dir, f'{i}.png'))
+                mse_loss = mse_criterion(y_batch_valid, batch_prediction)
+                psnr_loss = psnr_criterion(x_batch_valid, batch_prediction)
+                ssim_loss = ssim_criterion(y_batch_valid, batch_prediction)
                 loss_value = loss(y_batch_valid, batch_prediction)
+                total_mse_loss += mse_loss
+                total_psnr_loss += psnr_loss
+                total_ssim_loss += ssim_loss
                 total_loss += loss_value
-                iterator_valid.set_postfix({"Model Loss": "{:.5f}".format(loss_value.item())})
+                iterator_valid.set_postfix({"Model Loss": "{:.3f}".format(loss_value),
+                                            "MSE Loss": "{:.3f}".format(mse_loss),
+                                            "PSNR Loss": "{:.3f}".format(psnr_loss),
+                                            "SSIM Loss": "{:.3f}".format(ssim_loss)})
         if epoch_num % cfg.solver.iteration_save == 0:
             torch.save(model, os.path.join(curr_epoch_chkpt_dir, 'model_chkpt.pt'))
-        print(f"Validation Loss: {total_loss / len(valid_dataset)}")
+        print(f"Model Validation Loss: {total_loss / len(valid_dataset)}\n"
+              f"MSE Validation Loss: {total_mse_loss / len(valid_dataset)}\n"
+              f"SSIM Validation Loss: {total_ssim_loss / len(valid_dataset)}\n"
+              f"PSNR Validation Loss: {total_psnr_loss / len(valid_dataset)}")
 
 
 if __name__ == '__main__':
