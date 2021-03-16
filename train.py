@@ -89,7 +89,7 @@ def main():
             with torch.no_grad():
                 x_batch_valid, y_batch_valid = x_batch_valid['x1e5'].cuda(), y_batch_valid.cuda()
                 batch_prediction = model(x_batch_valid)
-                if epoch_num % cfg.solver.iteration_save  == 0:
+                if epoch_num % cfg.solver.iteration_save == 0 and cfg.visualize:
                     visualize(x_batch_valid.squeeze().cpu(),
                               y_batch_valid.squeeze().cpu(),
                               batch_prediction.squeeze().cpu(),

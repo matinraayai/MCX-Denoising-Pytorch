@@ -39,12 +39,9 @@ def compute_mid_cross_section_stats(fluence_maps: torch.Tensor, x_cross_section=
     if x_cross_section is None:
         x_cross_section = fluence_maps.shape[1] // 2
     for i in range(num_samples):
-        # cross_section[i, :] = fluence_maps[i, fluence_maps.shape[1] // 2, :]
         cross_section[i, :] = fluence_maps[i, x_cross_section, :]
     means = cross_section.mean(dim=0).log10()
     stds = cross_section.std(dim=0).log10()
-    # means[means != means] = 0
-    # stds[stds != stds] = 0
     snr_results = 20 * (means - stds)
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
@@ -167,10 +164,8 @@ def main():
     print("SNR improvements")
     for label in simulation_stats:
         if label != cfg.dataset.output_label:
-
             diff = prediction_stats[label]['snr'] - simulation_stats[label]['snr']
-            # diff_nonzero = diff[0.5 < diff]
-            diff_nonzero = diff[45:]
+            diff_nonzero = diff[0.5 < diff]
             snr_improvement = diff.mean()
             snr_improvement_non_zero = diff_nonzero.mean()
             print(f"{label}: SNR improvement: {snr_improvement}, Non-zero SNR improvement: {snr_improvement_non_zero}")
