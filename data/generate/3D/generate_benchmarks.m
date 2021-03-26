@@ -4,7 +4,7 @@ N = 100;
 GPU_IDs = '11';
 DATA_DIMs = [100 100 100];
 % Top level directory
-TOP_FOLDER_NAME = './rand3d-train';
+TOP_FOLDER_NAME = './absorb';
 TYPE = 'absorb'
 
 file_id = 0;

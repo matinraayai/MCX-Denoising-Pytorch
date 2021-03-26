@@ -9,13 +9,13 @@ function [cw, vol, cfg] = benchmark(nphoton, vol, gpu_ids, type)
     cfg.gpuid = gpu_ids;
     cfg.autopilot = 1;
 
-    if type == 'homo'
+    if strcmp(type, 'homo')
         cfg.prop = [0 0 1 1; 0.02 10 0.9 1.37; 0.02 10 0.9 1.37];
     end
-    if type == 'absorb'
+    if strcmp(type, 'absorb')
         cfg.prop = [0 0 1 1; 0.1  10 0.9 1.37; 0.02 10 0.9 1.37];
     end
-    if type == 'refractive'
+    if strcmp(type, 'refractive')
         cfg.prop = [0 0 1 1; 0.02 10 0.9 1.37; 0.02 10 0.9 6.85];
     end
 
