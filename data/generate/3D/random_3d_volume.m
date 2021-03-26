@@ -10,7 +10,7 @@ for i = 1 : num_props
         curr_prop = random_number_in_3d_volume(volsize);
     else
         centroid_to_vertex_dist = randi([round(rows / 8), round(rows / 3)]);
-        num_sides = randi([3, 10]);
+        num_sides = randi([4, 10]);
         curr_prop = random_polygon_in_3d_volume(num_sides, centroid_to_vertex_dist, volsize);
     end
     curr_prop = max_prop * curr_prop;
