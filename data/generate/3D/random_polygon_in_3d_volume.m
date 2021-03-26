@@ -3,7 +3,7 @@ function binary_volume = random_polygon_in_3d_volume(num_sides, centroid_to_vert
 try
 	% Create a polygon around the origin
     % Logic used from https://www.cmu.edu/biolphys/deserno/pdf/sphere_equi.pdf
-    v = 1 : num_sides;
+    v = 0 : num_sides - 1;
     z = (v / num_sides) * 2 * centroid_to_vertex_dist - centroid_to_vertex_dist;
     phi = (v / num_sides) * 2 * pi;
     x = sqrt(centroid_to_vertex_dist^2 - z.^2) .* cos(phi);
