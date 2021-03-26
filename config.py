@@ -188,6 +188,10 @@ _C.inference = CfgNode()
 # _C.INFERENCE.INPUT_PATH = ""
 # _C.INFERENCE.IMAGE_NAME = ""
 _C.inference.output_dir = "./results/"
+
+_C.inference.checkpoint_dir = ''
+
+_C.inference.do_2d = True
 # _C.INFERENCE.OUTPUT_NAME = 'result'
 #
 # _C.INFERENCE.PAD_SIZE = []
