@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright 2016 Colin B. Macdonald
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
+-->
+<component type="addon">
+  <id>octave-image</id>
+  <extends>www.octave.org-octave.desktop</extends>
+  <name>Image</name>
+  <summary>Image processing, feature extraction, transformations, morphological operations, filters, and more</summary>
+  <description>
+    <p>Provides functions for processing images, such as feature
+    extraction, image statistics, spatial and geometric
+    transformations, morphological operations, linear filtering, and
+    much more.</p>
+  </description>
+    <keywords>
+    <keyword>image processing</keyword>
+    <keyword>feature extraction</keyword>
+    <keyword>spatial transform</keyword>
+    <keyword>geometric transform</keyword>
+    <keyword>morphological operation</keyword>
+    <keyword>linear filter</keyword>
+    <keyword>convolution</keyword>
+    <keyword>bwregion</keyword>
+    <keyword>regionprops</keyword>
+  </keywords>
+  <url type="homepage">http://octave.sourceforge.net/image</url>
+  <url type="bugtracker">https://savannah.gnu.org/bugs/?func=additem&amp;group=octave</url>
+  <project_license>GPL-3.0+</project_license>
+  <developer_name>Octave-Forge Community</developer_name>
+  <update_contact>octave-maintainers@gnu.org</update_contact>
+  <metadata_license>FSFAP</metadata_license>
+</component>
