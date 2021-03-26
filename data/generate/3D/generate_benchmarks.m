@@ -6,6 +6,10 @@ DATA_DIMs = [100 100 100];
 % Top level directory
 TOP_FOLDER_NAME = './absorb';
 TYPE = 'absorb';
+if ~exist(TOP_FOLDER_NAME, 'dir')
+    mkdir(TOP_FOLDER_NAME);
+end
+
 addpath('../mcxlab');
 
 file_id = 0;
