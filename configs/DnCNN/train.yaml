@@ -1,7 +1,11 @@
 checkpoint_dir: './results/model: DnCNN; Loss: L2; Attempt: 3; Label: All labels'
 
 dataset:
-  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
-
+  input_labels: ['x1e5']
+model:
+  architecture: 'DnCNN'
+solver:
+  batch_size: 8
+visualize: False
 #model:
   #starting_checkpoint: './checkpoint/dncnn-l2-loss-chkpt/model_chkpt.pt'
