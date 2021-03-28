@@ -9,7 +9,7 @@ import tqdm
 from model.loss import SSIM, PSNR
 import torch.nn as nn
 from config import read_cfg_file
-from utils import visualize
+from evaluation.utils import visualize
 
 
 def get_args():
