@@ -24,6 +24,8 @@ _C.model.architecture = 'DnCNN'
 # DnCNN-specific arguments:
 _C.model.DnCNN = CfgNode()
 
+_C.model.DnCNN.do_3d = False
+
 _C.model.DnCNN.num_layers = 17
 
 _C.model.DnCNN.activation_fn = 'F.relu'
@@ -35,8 +37,12 @@ _C.model.DnCNN.inter_kernel_channel = 64
 # UNet-specific arguments:
 _C.model.UNet = CfgNode()
 
+_C.model.UNet.do_3d = False
+
 # Residual DnCNN-specific arguments:
 _C.model.ResidualDnCNN = CfgNode()
+
+_C.model.ResidualDnCNN.do_3d = False
 
 _C.model.ResidualDnCNN.num_layers = 17
 
@@ -50,6 +56,8 @@ _C.model.ResidualDnCNN.padding_mode = 'reflect'
 
 # Cascaded DnCNN + UNet Specific arguments:
 _C.model.Cascaded = CfgNode()
+
+_C.model.do_3d = False
 
 _C.model.Cascaded.num_dncnn = 1
 

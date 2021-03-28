@@ -30,6 +30,13 @@ def get_model(**kwargs):
         return DRUNet(**kwargs['DRUNet'])
 
 
+def load_model_from_checkpoint(checkpoint_dir, **kwargs):
+    model = get_model(**kwargs).cuda()
+    state_dict = torch.load(checkpoint_dir)
+    model.load_state_dict(state_dict.state_dict())
+    return model
+
+
 def get_loss(loss_opt=(), **kwargs):
     out = []
     for opt in loss_opt:

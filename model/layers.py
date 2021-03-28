@@ -19,33 +19,35 @@ class ResidualBlock(nn.Module):
     """
     expansion = 1
 
-    def __init__(self, in_channels, out_channels,
+    def __init__(self, in_channels, out_channels, do_3d=False,
                  kernel_size=3, stride=1, dilation=1,
                  padding=1,
-                 padding_mode='reflect',
+                 padding_mode='replicate',
                  option='A',
                  activation_fn=F.relu):
         super(ResidualBlock, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels,
-                               kernel_size=kernel_size, stride=stride,
-                               padding=padding, padding_mode=padding_mode,
-                               bias=False,
-                               dilation=dilation)
-        self.bn1 = nn.BatchNorm2d(out_channels)
-        self.conv2 = nn.Conv2d(out_channels, out_channels,
-                               kernel_size=kernel_size, stride=stride,
-                               padding=padding, padding_mode=padding_mode,
-                               bias=False,
-                               dilation=dilation)
-        self.bn2 = nn.BatchNorm2d(out_channels)
+        conv_layer = nn.Conv3d if do_3d else nn.Conv2d
+        norm_layer = nn.BatchNorm3d if do_3d else nn.BatchNorm2d
+        self.conv1 = conv_layer(in_channels, out_channels,
+                                kernel_size=kernel_size, stride=stride,
+                                padding=padding, padding_mode=padding_mode,
+                                bias=False,
+                                dilation=dilation)
+        self.bn1 = norm_layer(out_channels)
+        self.conv2 = conv_layer(out_channels, out_channels,
+                                kernel_size=kernel_size, stride=stride,
+                                padding=padding, padding_mode=padding_mode,
+                                bias=False,
+                                dilation=dilation)
+        self.bn2 = norm_layer(out_channels)
         self.shortcut = nn.Sequential()
         if stride != 1 or in_channels != out_channels:
             if option == 'A':
                 self.shortcut = Identity(out_channels)
             elif option == 'B':
                 self.shortcut = nn.Sequential(
-                    nn.Conv2d(in_channels, self.expansion * out_channels, kernel_size=1, stride=stride, bias=False),
-                    nn.BatchNorm2d(self.expansion * out_channels)
+                    conv_layer(in_channels, self.expansion * out_channels, kernel_size=1, stride=stride, bias=False),
+                    norm_layer(self.expansion * out_channels)
                 )
         self.activation_fn = activation_fn
 

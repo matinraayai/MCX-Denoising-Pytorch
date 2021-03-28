@@ -11,8 +11,8 @@ from config import get_cfg_defaults
 from model.loss import PSNR, SSIM
 import torch.nn as nn
 from time import time
-from utils import visualize
-
+from evaluation.utils import visualize
+from octave import octave
 
 def get_args():
     parser = argparse.ArgumentParser(description="Model Inference")
@@ -20,6 +20,16 @@ def get_args():
     parser.add_argument('--checkpoint', type=str, default=None, help='path to load the checkpoint')
     parser.add_argument('--cross-section', type=int, default=None, help='Cross section to calculate the SNR plot')
     return parser.parse_args()
+
+
+def ANLM_filter(x: torch.Tensor):
+    x = x.cpu().numpy()
+    output = torch.from_numpy(octave.mcx_filter(x, 3, 1, 2))
+    # Remove the nan and inf results
+    output[output != output] = 0
+    output[output == float('inf')] = 0
+    output[output == float('-inf')] = 0
+    return output
 
 
 def compute_mid_cross_section_stats(fluence_maps: torch.Tensor, x_cross_section=None):
@@ -40,14 +50,20 @@ def compute_mid_cross_section_stats(fluence_maps: torch.Tensor, x_cross_section=
         x_cross_section = fluence_maps.shape[1] // 2
     for i in range(num_samples):
         cross_section[i, :] = fluence_maps[i, x_cross_section, :]
+    print(cross_section)
     means = cross_section.mean(dim=0).log10()
     stds = cross_section.std(dim=0).log10()
     snr_results = 20 * (means - stds)
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
-def plot_stats(simulation_stats, prediction_states, x_cross_section, output_dir, matplotlib_backend='Agg'):
+def plot_stats(simulation_stats, prediction_states, anlm_prediction_stats,
+               x_cross_section, output_dir, matplotlib_backend='Agg'):
     matplotlib.use(matplotlib_backend)
+    if type(x_cross_section) == str and x_cross_section.lower() == 'middle':
+        x_cross_section = 'in the middle'
+    else:
+        x_cross_section = f'at {x_cross_section}'
 
     def add_label_to_stat_plot(label, stat_name, color):
         simulation_curve = simulation_stats[label][stat_name]
@@ -56,6 +72,9 @@ def plot_stats(simulation_stats, prediction_states, x_cross_section, output_dir,
         if label in prediction_states:
             prediction_curve = prediction_states[label][stat_name]
             plt.plot(x_values, prediction_curve, color=color, linestyle='dashed', label=label + "_pred")
+            # anlm_curve = anlm_prediction_stats[label][stat_name]
+            # print(anlm_curve)
+            # plt.plot(x_values, anlm_curve, color=color, linestyle='dashdot', label=label + "_anlm")
 
     def create_stat_plot(stat_name, x_axis_label, y_axis_label):
         c_map = plt.cm.get_cmap('hsv', 10)
@@ -69,9 +88,9 @@ def plot_stats(simulation_stats, prediction_states, x_cross_section, output_dir,
         plt.savefig(os.path.join(output_dir, f'{stat_name}.png'))
         plt.close()
 
-    create_stat_plot('snr', f'Y over Cross Section at {x_cross_section} (mm)', 'SNR (DBs)')
-    create_stat_plot('means', f'Y over Cross Section at {x_cross_section} (mm)', 'Mean W/mm^2')
-    create_stat_plot('stds', f'Y over Cross Section at {x_cross_section} (mm)', 'STD ΔW/mm^2')
+    create_stat_plot('snr', f'Y over Cross Section {x_cross_section} (mm)', 'SNR (DBs)')
+    create_stat_plot('means', f'Y over Cross Section {x_cross_section} (mm)', 'Mean W/mm^2')
+    create_stat_plot('stds', f'Y over Cross Section {x_cross_section} (mm)', 'STD ΔW/mm^2')
 
 
 def main():
@@ -120,7 +139,10 @@ def main():
     os.makedirs(test_output_dir, exist_ok=True)
     simulations = {label: [] for label in cfg.dataset.input_labels + [cfg.dataset.output_label]}
     predictions = {label: [] for label in cfg.dataset.input_labels}
+    # anlm_predictions = {label: [] for label in cfg.dataset.input_labels}
     for i, (x_tests, y_test) in enumerate(iterator_test):
+        # for label, x_test in x_tests.items():
+        #     anlm_predictions[label].append(ANLM_filter(x_test))
         x_tests = {label: x_test.cuda() for label, x_test in x_tests.items()}
         y_test = y_test.cuda()
         with torch.no_grad():
@@ -132,27 +154,32 @@ def main():
                 mse_loss += mse_criterion(prediction, y_test)
                 ssim_loss += ssim_criterion(prediction, y_test)
                 psnr_loss += psnr_criterion(x_test, prediction)
-                # Stats array update
-                simulations[label].append(x_test)
-                predictions[label].append(prediction)
+
                 # visualize
                 visualize(x_test.squeeze().cpu().numpy(),
                           y_test.squeeze().cpu().numpy(),
                           prediction.squeeze().cpu().numpy(),
                           os.path.join(test_output_dir, f'{i}_{label}.png'))
                 iterator_test.set_postfix({"Inf. time": "{:.5f}".format(end - start)})
+                # Stats array update
+                simulations[label].append(torch.exp(x_test - 1))
+                predictions[label].append(torch.exp(prediction - 1))
             # Append label to stats
-            simulations[cfg.dataset.output_label].append(y_test)
+            simulations[cfg.dataset.output_label].append(torch.exp(y_test - 1))
 
     simulations = {label: torch.cat(simulation).squeeze() for label, simulation in simulations.items()}
     predictions = {label: torch.cat(prediction).squeeze() for label, prediction in predictions.items()}
+    # anlm_predictions = {label: torch.cat(prediction).squeeze() for label, prediction in anlm_predictions.items()}
 
+    # torch.save(anlm_predictions, 'tmp')
     simulation_stats = {label: compute_mid_cross_section_stats(simulation) for label, simulation in simulations.items()}
     prediction_stats = {label: compute_mid_cross_section_stats(prediction) for label, prediction in predictions.items()}
+    # anlm_predictions_stats = {label: compute_mid_cross_section_stats(prediction) for label, prediction in
+    #                           anlm_predictions.items()}
 
     if args.cross_section is None:
         args.cross_section = 'Middle'
-    plot_stats(simulation_stats, prediction_stats, args.cross_section, cfg.inference.output_dir)
+    plot_stats(simulation_stats, prediction_stats, None, args.cross_section, cfg.inference.output_dir)
 
     print(f"Metrics:",
           f"Mean MSE Loss: {mse_loss / len(test_dataset)}",
@@ -161,6 +188,15 @@ def main():
           )
 
     # calculate SNR improvement for each label
+    # print("ANLM improvements")
+    # for label in anlm_predictions_stats:
+    #     if label != cfg.dataset.output_label:
+    #         diff = anlm_predictions_stats[label]['snr'] - simulation_stats[label]['snr']
+    #         diff_nonzero = diff[0.5 < diff]
+    #         snr_improvement = diff.mean()
+    #         snr_improvement_non_zero = diff_nonzero.mean()
+    #         print(f"{label}: SNR improvement: {snr_improvement}, Non-zero SNR improvement: {snr_improvement_non_zero}")
+
     print("SNR improvements")
     for label in simulation_stats:
         if label != cfg.dataset.output_label:
