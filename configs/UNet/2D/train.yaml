@@ -1,0 +1,10 @@
+checkpoint_dir: './results/UNet 2D/'
+
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+
+model:
+  architecture: 'UNet'
+
+solver:
+  batch_size: 32
