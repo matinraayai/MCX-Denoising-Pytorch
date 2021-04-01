@@ -1,7 +1,7 @@
 function [volume, max_prop] = random_3d_volume(volsize, num_props)
 %
-rows = volsize(1)
-columns = volsize(2)
+rows = volsize(1);
+columns = volsize(2);
 volume = zeros(volsize);
 max_prop = 1;
 
