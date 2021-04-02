@@ -47,7 +47,7 @@ class OsaDataset(torch.utils.data.Dataset):
         y = read_norm_sqz_from_mat_file(mat_file, self.output_label)
         if self.crop_size is not None:
             assert self.crop_size[0] < y.shape[1] and self.crop_size[1] < y.shape[2]
-            crop_pos = (0, ) * len(y.shape)
+            crop_pos = (0, ) * (len(y.shape) - 1)
             for input_label in self.input_labels:
                 x[input_label] = crop_volume(x[input_label], crop_pos, self.crop_size)
             y = crop_volume(y, crop_pos, self.crop_size)
