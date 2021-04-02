@@ -2,9 +2,12 @@ checkpoint_dir: './checkpoint/UNet 3D/'
 
 dataset:
   input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  train_path: '../../Dataset/MCX/3D/train/'
+  valid_path: '../../Dataset/MCX/3D/train/'
 
 model:
   architecture: 'UNet'
-
+  UNet:
+    do_3d: True
 solver:
-  batch_size: 32
+  batch_size: 2

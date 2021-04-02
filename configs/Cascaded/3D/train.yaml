@@ -9,6 +9,7 @@ dataset:
 model:
   architecture: 'Cascaded'
   Cascaded:
+    do_3d: True
     num_dncnn: 1
 solver:
   batch_size: 8

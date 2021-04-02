@@ -57,7 +57,7 @@ _C.model.ResidualDnCNN.padding_mode = 'reflect'
 # Cascaded DnCNN + UNet Specific arguments:
 _C.model.Cascaded = CfgNode()
 
-_C.model.do_3d = False
+_C.model.Cascaded.do_3d = False
 
 _C.model.Cascaded.num_dncnn = 1
 
