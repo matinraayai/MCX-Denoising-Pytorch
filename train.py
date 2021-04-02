@@ -48,7 +48,7 @@ def main():
 
     psnr_criterion = PSNR()
 
-    train_augmentor = build_train_augmentor(cfg.dataset.crop_size, **cfg.aug)
+    train_augmentor = build_train_augmentor(**cfg.aug)
     train_dataset = OsaDataset(cfg.dataset.train_path, cfg.dataset.input_labels,
                                cfg.dataset.output_label, True, cfg.dataset.crop_size, train_augmentor)
     valid_dataset = OsaDataset(cfg.dataset.valid_path, ['x1e5'],

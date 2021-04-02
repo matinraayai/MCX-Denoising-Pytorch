@@ -1,4 +1,4 @@
-from .composition import Compose
+from torchvision.transforms import Compose
 from .augmentor import DataAugment
 
 # augmentation methods
@@ -11,10 +11,7 @@ __all__ = ['Compose',
            'Flip']
 
 
-def build_train_augmentor(model_input_size, keep_uncropped=False, keep_non_smoothed=False, **kwargs):
-    # The two arguments, keep_uncropped and keep_non_smoothed, are used only
-    # for debugging, which are False by defaults and can not be adjusted
-    # in the config files.
+def build_train_augmentor(**kwargs):
     aug_list = []
 
     # 1. rotate
@@ -25,9 +22,4 @@ def build_train_augmentor(model_input_size, keep_uncropped=False, keep_non_smoot
     if kwargs['flip']['enabled']:
         aug_list.append(Flip(p=kwargs['flip']['p']))
 
-    augmentor = Compose(transforms=aug_list, 
-                        input_size=model_input_size,
-                        smooth=kwargs['smooth'],
-                        keep_uncropped=keep_uncropped,
-                        keep_non_smoothed=keep_non_smoothed)
-    return augmentor
+    return Compose(transforms=aug_list)
