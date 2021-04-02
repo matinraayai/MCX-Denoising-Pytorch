@@ -22,7 +22,7 @@ def random_crop(x, y, crop_size):
 
 
 def crop_volume(vol, crop_pos, crop_size):
-    crop_slice = (slice(0),) + tuple(slice(crop_pos[i], crop_pos[i] + crop_size[i - 1]) for i in range(len(crop_pos)))
+    crop_slice = (slice(1),) + tuple(slice(crop_pos[i], crop_pos[i] + crop_size[i - 1]) for i in range(len(crop_pos)))
     return vol[crop_slice]
 
 
