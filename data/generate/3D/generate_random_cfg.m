@@ -14,7 +14,7 @@ function cfg = generate_random_cfg(imsize, num_props, gpu_ids, randseed)
     cfg.issrcfrom0 = 1;
     cfg.srctype = 'isotropic';
 
-    cfg.srcpos = [rand() * imsize(1), rand() * imsize(2), rand() * imsize(3)]
+    cfg.srcpos = [rand() * imsize(1), rand() * imsize(2), rand() * imsize(3)];
 
     cfg.srcdir = [imsize(1) * 0.5 - cfg.srcpos(1),  imsize(2) * 0.5 - cfg.srcpos(2), imsize(3) * 0.5 - cfg.srcpos(3)];
     cfg.srcdir = cfg.srcdir / norm(cfg.srcdir);

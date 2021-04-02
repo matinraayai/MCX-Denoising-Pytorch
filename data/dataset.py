@@ -3,7 +3,6 @@ from typing import List
 import scipy.io as spio
 import torch
 import numpy as np
-import torchvision.transforms.functional as transforms
 from numpy.random import randint
 from .augmentation import Compose
 

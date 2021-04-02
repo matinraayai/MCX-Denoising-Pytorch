@@ -10,6 +10,7 @@ from model.loss import SSIM, PSNR
 import torch.nn as nn
 from config import read_cfg_file
 from evaluation.utils import visualize
+from data.augmentation import build_train_augmentor
 
 
 def get_args():
@@ -47,9 +48,9 @@ def main():
 
     psnr_criterion = PSNR()
 
+    train_augmentor = build_train_augmentor(cfg.dataset.crop_size, **cfg.aug)
     train_dataset = OsaDataset(cfg.dataset.train_path, cfg.dataset.input_labels,
-                               cfg.dataset.output_label, True, cfg.dataset.crop_size, cfg.dataset.max_rotation_angle,
-                               cfg.dataset.rotation_p, cfg.dataset.flip_p)
+                               cfg.dataset.output_label, True, cfg.dataset.crop_size, train_augmentor)
     valid_dataset = OsaDataset(cfg.dataset.valid_path, ['x1e5'],
                                cfg.dataset.output_label, False, cfg.dataset.crop_size)
     train_dataloader = DataLoader(train_dataset, cfg.solver.batch_size, shuffle=True,

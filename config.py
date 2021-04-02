@@ -109,13 +109,19 @@ _C.dataset.output_label = 'x1e9'
 
 _C.dataset.dataloader_workers = cpu_count() - 1
 
-_C.dataset.max_rotation_angle = 90.
-
-_C.dataset.rotation_p = .7
-
 _C.dataset.crop_size = None
 
-_C.dataset.flip_p = .5
+_C.aug = CfgNode()
+
+_C.aug.rotate = CfgNode({'enabled': True})
+
+_C.aug.rotate.p = 0.7
+
+_C.aug.flip = CfgNode({'enabled': True})
+
+_C.aug.flip.p = 1.
+
+_C.aug.smooth = True
 
 # -----------------------------------------------------------------------------
 # Solver
