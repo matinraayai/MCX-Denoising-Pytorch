@@ -1,11 +1,11 @@
 function [cw, vol, cfg] = benchmark(nphoton, vol, gpu_ids, type)
     cfg.nphoton = nphoton;
-    vol = uint8(ones(100, 100));
-    volume(30:70, 10:50) = 2;
+    vol = uint8(ones(1, 100, 100));
+    vol(:, 30:70, 10:50) = 2;
     cfg.vol = vol;
 
-    cfg.srcpos = [50 0];
-    cfg.srcdir = [0 1];
+    cfg.srcpos = [1 50 0];
+    cfg.srcdir = [0 0 1];
     cfg.gpuid = gpu_ids;
     cfg.autopilot = 1;
 

@@ -1,5 +1,5 @@
 clear cfg cfgs
-PHOTON_LIST = [1e5 1e6 1e7];
+PHOTON_LIST = [1e5 1e6 1e7 1e8 1e9];
 N = 100;
 GPU_IDs = '11';
 DATA_DIMs = [100 100];
@@ -10,7 +10,7 @@ if ~exist(TOP_FOLDER_NAME, 'dir')
     mkdir(TOP_FOLDER_NAME);
 end
 
-addpath('../../octave');
+addpath('../../../octave');
 
 file_id = 0;
 for i = 1 : N
