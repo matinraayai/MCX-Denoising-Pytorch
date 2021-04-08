@@ -10,7 +10,7 @@ if ~exist(TOP_FOLDER_NAME, 'dir')
     mkdir(TOP_FOLDER_NAME);
 end
 
-addpath('../mcxlab');
+addpath('../../octave');
 
 file_id = 0;
 for i = 1 : N
