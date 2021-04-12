@@ -1,10 +1,13 @@
-function binary_image = random_polygon_in_2d_volume(num_sides, centroid_to_vertex_dist, volume_size)
+function binary_image = random_polygon_in_2d_volume(num_sides, ctr_to_vtx_range, volume_size)
     % Starter code from: https://au.mathworks.com/matlabcentral/answers/uploaded_files/201505/shape_recognition_demo1.m
-    % Generates a random polygon with the specified number of sides and centroid to vertex distance with the value of 1
-    % inside a zeros 2D matrix. The shape is randomly rotated and placed in the volume.
+    % Generates a random polygon with the specified number of sides with the value of 1 inside a zeros 2D matrix.
+    % If the length of ctr_to_vtx_range is 2, center to vertex distance for each vertex is randomly generated
+    % between the range provided. If only a single number is provided, the vertices will have the same distance.
+    % The shape is randomly rotated and placed in the volume.
     % Input:
     %       num_sides: Number of sides of the polygon
-    %       centroid_to_vertex_dist: Distance from a vertex to the centroid.
+    %       centroid_to_vertex_range: In form of [min_distance, max_distance], specifies the distance range from a
+    %       vertex to the centroid.
     %       volume_size: Size of the volume, in shape of [rows, columns]
     %
 
@@ -16,26 +19,32 @@ function binary_image = random_polygon_in_2d_volume(num_sides, centroid_to_verte
 	% Make the first point to be the last for mask2poly
 	v(end + 1) = 1;
 	angle = v * 2 * pi / num_sides;
-	x = centroid_to_vertex_dist * cos(angle);
-	y = centroid_to_vertex_dist * sin(angle);
+	% Randomly generate distances for each vertex if a range is specified
+	if length(ctr_to_vtx_range) == 2
+	    ctr_to_vtx_dists = randi(ctr_to_vtx_range, [1, num_sides + 1]);
+	end
+	x = ctr_to_vtx_dists .* cos(angle);
+	y = ctr_to_vtx_dists .* sin(angle);
 
 	% Rotate the coordinates by a random angle between 0 and 2pi
 	angle_to_rotate = 2 * pi * rand();
-	[x, y] = rotate_2d(x, y, angle_to_rotate);
-	% Get a random center location between centroidToVertexDistance and (columns - centroidToVertexDistance).
+	[x, y] = rotate_2d(x, y, angle_to_rotate)
+	% Get a random center location between centroid_to_vertex_distance and (columns - centroid_to_vertex_distance).
 	% This will ensure it's always in the image.
-	x_center = centroid_to_vertex_dist + (columns - 2 * centroid_to_vertex_dist) * rand(1);
-	% Get a random center location between centroidToVertexDistance and (rows - centroidToVertexDistance).
+	max_distance = max(ctr_to_vtx_range);
+	x_center = max_distance + (columns - 2 * max_distance) * rand(1);
+	% Get a random center location between centroid_to_vertex_distance and (rows - centroid_to_vertex_distance).
 	% This will ensure it's always in the image.
-	y_center = centroid_to_vertex_dist + (rows - 2 * centroid_to_vertex_dist) * rand(1);
-	% Translate the image so that the center is at (xCenter, yCenter) rather than at (0,0).
+	y_center = max_distance + (rows - 2 * max_distance) * rand(1);
+	% Translate the image so that the center is at (x_center, y_center) rather than at (0,0).
 	x = x + x_center;
 	y = y + y_center;
 	binary_image = poly2mask(x, y, rows, columns);
 
 function [x_rot, y_rot] = rotate_2d(x, y, angle)
+    % Rotates a set of points in x and y by the given angle
     rotation_matrix = [cos(angle), sin(angle); -sin(angle), cos(angle)];
     xy = [x', y'];
-	xy_rotated = xy * rotation_matrix; % A numSides*2 matrix times a 2*2 = a numSides*2 matrix.
-	x_rot = xy_rotated(:, 1); % Extract out the x as a numSides*2 matrix.
-	y_rot = xy_rotated(:, 2); % Extract out the y as a numSides*2 matrix.
+	xy_rotated = xy * rotation_matrix;
+	x_rot = xy_rotated(:, 1)';
+	y_rot = xy_rotated(:, 2)';
