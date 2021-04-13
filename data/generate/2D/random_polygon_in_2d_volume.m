@@ -1,4 +1,4 @@
-function binary_image = random_polygon_in_2d_volume(num_sides, ctr_to_vtx_range, volume_size)
+function binary_image = random_polygon_in_2d_volume(num_sides, ctr_to_vtx_range, image_size)
     % Starter code from: https://au.mathworks.com/matlabcentral/answers/uploaded_files/201505/shape_recognition_demo1.m
     % Generates a random polygon with the specified number of sides with the value of 1 inside a zeros 2D matrix.
     % If the length of ctr_to_vtx_range is 2, center to vertex distance for each vertex is randomly generated
@@ -8,11 +8,13 @@ function binary_image = random_polygon_in_2d_volume(num_sides, ctr_to_vtx_range,
     %       num_sides: Number of sides of the polygon
     %       centroid_to_vertex_range: In form of [min_distance, max_distance], specifies the distance range from a
     %       vertex to the centroid.
-    %       volume_size: Size of the volume, in shape of [rows, columns]
-    %
+    %       image_size: Size of the image, in shape of [rows, columns]
+    % Output:
+    %       binary_iamge: A binary image with the size of volume_size, with 1 indicating the polygon and 0 indicating
+    %                     the absence of the polygon.
 
-    rows = volume_size(1);
-    columns = volume_size(2);
+    rows = image_size(1);
+    columns = image_size(2);
 
 	% Create a polygon around the origin
 	v = 1 : num_sides;
@@ -28,13 +30,11 @@ function binary_image = random_polygon_in_2d_volume(num_sides, ctr_to_vtx_range,
 
 	% Rotate the coordinates by a random angle between 0 and 2pi
 	angle_to_rotate = 2 * pi * rand();
-	[x, y] = rotate_2d(x, y, angle_to_rotate)
-	% Get a random center location between centroid_to_vertex_distance and (columns - centroid_to_vertex_distance).
+	[x, y] = rotate_2d(x, y, angle_to_rotate);
+	% Get a random center location between max_distance and (columns - max_distance).
 	% This will ensure it's always in the image.
 	max_distance = max(ctr_to_vtx_range);
 	x_center = max_distance + (columns - 2 * max_distance) * rand(1);
-	% Get a random center location between centroid_to_vertex_distance and (rows - centroid_to_vertex_distance).
-	% This will ensure it's always in the image.
 	y_center = max_distance + (rows - 2 * max_distance) * rand(1);
 	% Translate the image so that the center is at (x_center, y_center) rather than at (0,0).
 	x = x + x_center;
