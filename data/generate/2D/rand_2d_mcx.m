@@ -35,11 +35,10 @@ cfg.vol = permute(uint8(vol), [3, 1, 2]);
 
 cfg.issrcfrom0 = 1;
 cfg.srctype = 'isotropic';
-
 cfg.srcpos = [0, rand() * imsize(1), rand() * imsize(2)];
-
 cfg.srcdir = [0, imsize(1) * 0.5 - cfg.srcpos(2),  imsize(2) * 0.5 - cfg.srcpos(3)];
 cfg.srcdir = cfg.srcdir / norm(cfg.srcdir);
+
 cfg.gpuid = gpu_ids;
 cfg.autopilot = 1;
 musp = abs(randn(maxprop, 1) + 1);
