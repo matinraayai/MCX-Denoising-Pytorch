@@ -65,9 +65,15 @@ def main():
         iterator = tqdm.tqdm(train_dataloader)
         iterator.set_description(f"Epoch #{epoch_num}")
 
-        for iteration, (x_batch_train, y_batch_train) in enumerate(iterator):
+        for iteration, (label_batch, x_batch_train, y_batch_train) in enumerate(iterator):
             x_batch_train, y_batch_train = x_batch_train.cuda(), y_batch_train.cuda()
             optimizer.zero_grad()
+            if cfg.model.noise_map:
+                #TODO: Fix noise level input
+                noise_level = [float(label[-1]) for label in label_batch]
+                noise_map = torch.tensor([noise_level]).cuda().repeat(1, *cfg.dataset.crop_size, 1).permute(3, 0, 1, 2)
+                print(noise_map.shape)
+                x_batch_train = torch.cat([x_batch_train, noise_map], dim=1)
             batch_prediction = model(x_batch_train)
             loss_value = loss(y_batch_train, batch_prediction)
             loss_value.backward()

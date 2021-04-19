@@ -21,6 +21,8 @@ _C.model.starting_checkpoint = ''
 
 _C.model.architecture = 'DnCNN'
 
+_C.model.noise_map = False
+
 # DnCNN-specific arguments:
 _C.model.DnCNN = CfgNode()
 
@@ -102,6 +104,8 @@ _C.dataset = CfgNode()
 _C.dataset.train_path = 'data/rand2d/train/'
 
 _C.dataset.valid_path = 'data/rand2d/validation/'
+
+_C.dataset.test_path = 'data/rand2d/test/'
 
 _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
 
