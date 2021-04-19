@@ -12,7 +12,7 @@ def make_path_list(dir_name):
 
 
 def read_norm_sqz_from_mat_file(mat_file, label):
-    return torch.log(torch.from_numpy(mat_file[label].astype(np.float32)) + 1.).unsqueeze(0) / 20
+    return torch.log(torch.from_numpy(mat_file[label].astype(np.float32)) + 1.).unsqueeze(0) / 40
 
 
 def random_crop(x, y, crop_size):
