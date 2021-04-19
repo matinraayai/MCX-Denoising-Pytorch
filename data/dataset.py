@@ -66,7 +66,7 @@ class OsaDataset(torch.utils.data.Dataset):
         if self.augmentor is not None:
             augmented = self.augmentor({'image': x, 'label': y})
             x, y = augmented['image'], augmented['label']
-        return x, y
+        return input_label, x, y
 
     def __getitem__(self, item):
         if self.is_train:
