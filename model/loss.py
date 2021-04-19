@@ -51,7 +51,7 @@ def _ssim(t1, t2, window, window_size, channel, size_average=True):
 
 
 class SSIM(nn.Module):
-    def __init__(self, window_size=11, channel=1, dim=3, size_average=True):
+    def __init__(self, window_size=11, channel=1, dim=2, size_average=True):
         super(SSIM, self).__init__()
         self.window_size = window_size
         self.size_average = size_average
