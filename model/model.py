@@ -20,12 +20,14 @@ def _weights_init(m):
 
 
 class UNet(nn.Module):
-    def __init__(self, do_3d=False, **kwargs):
+    def __init__(self, do_3d=False, activation_fn='F.relu', **kwargs):
         super(UNet, self).__init__()
         conv_layer = nn.Conv3d if do_3d else nn.Conv2d
         norm_layer = nn.BatchNorm3d if do_3d else nn.BatchNorm2d
         pool_layer = nn.MaxPool3d if do_3d else nn.MaxPool2d
         conv_trans_layer = nn.ConvTranspose3d if do_3d else nn.ConvTranspose2d
+        self.activation_fn = eval(activation_fn)
+        # Down0
         self.down0a = conv_layer(1, 64, 3, padding=1, padding_mode='replicate')
         self.down0a_norm = norm_layer(64)
         self.down0b = conv_layer(64, 64, 3, padding=1, padding_mode='replicate')
@@ -63,24 +65,24 @@ class UNet(nn.Module):
         self.last_layer = conv_layer(64, 1, 1)
 
     def forward(self, x):
-        down0a = self.down0a_norm(self.down0a(x))
-        down0b = self.down0b_norm(self.down0b(down0a))
+        down0a = self.activation_fn(self.down0a_norm(self.down0a(x)))
+        down0b = self.activation_fn(self.down0b_norm(self.down0b(down0a)))
         down0c = self.down0c(down0b)
-        down1a = self.down1a_norm(self.down1a(down0c))
-        down1b = self.down1b_norm(self.down1b(down1a))
+        down1a = self.activation_fn(self.down1a_norm(self.down1a(down0c)))
+        down1b = self.activation_fn(self.down1b_norm(self.down1b(down1a)))
         down1c = self.down1c(down1b)
-        down2a = self.down2a_norm(self.down2a(down1c))
-        down2b = self.down2b_norm(self.down2b(down2a))
+        down2a = self.activation_fn(self.down2a_norm(self.down2a(down1c)))
+        down2b = self.activation_fn(self.down2b_norm(self.down2b(down2a)))
         up1a = self.up1a_norm(self.up1a(down2b))
         up1b = torch.cat([up1a, down1b], dim=1)
-        up1c = self.up1c_norm(self.up1c(up1b))
-        up1d = self.up1d_norm(self.up1d(up1c))
-        up1e = self.up1e_norm(self.up1e(up1d))
+        up1c = self.activation_fn(self.up1c_norm(self.up1c(up1b)))
+        up1d = self.activation_fn(self.up1d_norm(self.up1d(up1c)))
+        up1e = self.activation_fn(self.up1e_norm(self.up1e(up1d)))
         up0a = self.up0a_norm(self.up0a(up1e))
         up0b = torch.cat([up0a, down0b], dim=1)
-        up0c = self.up0c_norm(self.up0c(up0b))
-        up0d = self.up0d_norm(self.up0d(up0c))
-        up0e = self.up0e_norm(self.up0e(up0d))
+        up0c = self.activation_fn(self.up0c_norm(self.up0c(up0b)))
+        up0d = self.activation_fn(self.up0d_norm(self.up0d(up0c)))
+        up0e = self.activation_fn(self.up0e_norm(self.up0e(up0d)))
         output = self.last_layer(up0e)
         return x - output
 
@@ -202,7 +204,7 @@ class DRUNet(nn.Module):
         self.m_body = nn.Sequential(*self.m_body)
 
         def upsample_block(in_channels, out_channels):
-            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=3)]
+            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=2, stride=2)]
             module += [nn.ReLU(inplace=True)]
             module += [ResidualBlock(out_channels, out_channels, activation_fn=activation_function)
                        for _ in range(num_res_blocks)]
@@ -224,61 +226,6 @@ class DRUNet(nn.Module):
         x = self.m_body(x4)
         x = self.m_up3(x + x4)
         x = self.m_up2(x + x3)
-        x = self.m_up1(x + x2)
-        x = self.m_tail(x + x1)
-        return x
-
-
-class HUNet(nn.Module):
-    def __init__(self, in_nc=1, out_nc=1,
-                 res_block_channels=None,
-                 num_conv_blocks=4, activation_function='F.relu'):
-        super(HUNet, self).__init__()
-        if res_block_channels is None:
-            res_block_channels = [64, 128, 256, 512]
-        self.m_head = nn.Conv2d(in_nc, res_block_channels[0], bias=False, kernel_size=3, stride=1, padding=1)
-
-        activation_function = eval(activation_function)
-
-        def downsample_block(in_channels, out_channels):
-            module = [nn.Sequential(
-                      nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1, padding_mode='reflect'),
-                      nn.ReLU(inplace=True)) for _ in range(num_conv_blocks)]
-            module += [nn.Conv2d(in_channels, out_channels, kernel_size=3, bias=False)]
-            return nn.Sequential(*module)
-
-        self.m_down1 = downsample_block(res_block_channels[0], res_block_channels[1])
-
-        self.m_down2 = downsample_block(res_block_channels[1], res_block_channels[2])
-
-        self.m_down3 = downsample_block(res_block_channels[2], res_block_channels[3])
-
-        self.m_body = [ResidualBlock(res_block_channels[3], res_block_channels[3]) for _ in range(num_conv_blocks)]
-
-        self.m_body = nn.Sequential(*self.m_body)
-
-        def upsample_block(in_channels, out_channels):
-            module = [nn.ConvTranspose2d(in_channels, out_channels, bias=False, kernel_size=2, stride=2),
-                      nn.ReLU(inplace=True)]
-            module += [nn.Sequential(
-                      nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1, padding_mode='reflect'),
-                      nn.ReLU(inplace=True)) for _ in range(num_conv_blocks)]
-            return nn.Sequential(*module)
-
-        self.m_up3 = upsample_block(res_block_channels[3], res_block_channels[2])
-
-        self.m_up2 = upsample_block(res_block_channels[2], res_block_channels[1])
-
-        self.m_up1 = upsample_block(res_block_channels[1], res_block_channels[0])
-
-        self.m_tail = nn.Conv2d(res_block_channels[0], out_nc, bias=False, kernel_size=3, stride=1, padding=1)
-
-    def forward(self, x0):
-        x1 = self.m_head(x0)
-        x2 = self.m_down1(x1)
-        x3 = self.m_down2(x2)
-        x4 = self.m_down3(x3)
-        x = self.m_up2(x4 + x3)
         x = self.m_up1(x + x2)
         x = self.m_tail(x + x1)
         return x
