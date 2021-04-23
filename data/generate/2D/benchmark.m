@@ -4,7 +4,8 @@ function [cw, vol, cfg] = benchmark(nphoton, vol, gpu_ids, type)
     vol(:, 30:70, 10:50) = 2;
     cfg.vol = vol;
 
-    cfg.srcpos = [1 50 0];
+    cfg.issrcfrom0 = 1;
+    cfg.srcpos = [0 50 0];
     cfg.srcdir = [0 0 1];
     cfg.gpuid = gpu_ids;
     cfg.autopilot = 1;
@@ -13,7 +14,7 @@ function [cw, vol, cfg] = benchmark(nphoton, vol, gpu_ids, type)
         cfg.prop = [0 0 1 1; 0.02 10 0.9 1.37; 0.02 10 0.9 1.37];
     end
     if strcmp(type, 'absorb')
-        cfg.prop = [0 0 1 1; 0.1  10 0.9 1.37; 0.02 10 0.9 1.37];
+        cfg.prop = [0 0 1 1; 0.02 10 0.9 1.37; 0.1  10 0.9 1.37];
     end
     if strcmp(type, 'refractive')
         cfg.prop = [0 0 1 1; 0.02 10 0.9 1.37; 0.02 10 0.9 6.85];
