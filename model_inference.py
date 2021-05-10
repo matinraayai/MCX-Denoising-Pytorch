@@ -1,5 +1,5 @@
 """
-    Author: Matin Raayai Ardakani (raayaiardakani.m@northeastern.edu)
+Applies the denoising model to the test sets in both 2D and 3D cases.
 """
 import os
 import torch
@@ -14,25 +14,32 @@ import scipy.io as scio
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Script for inference")
+    parser = argparse.ArgumentParser(description="Script for denoising model inference")
     parser.add_argument('--config-file', type=str, help='configuration file for the model (yaml)')
     return parser.parse_args()
 
 
-def infer(model, x, do_2d):
-    if do_2d:
+def infer(model, x, denoise_3d_with_2d):
+    if denoise_3d_with_2d:
         y = torch.zeros_like(x)
+        # Infer on x-axis
         for i in range(x.shape[2]):
             x_2d = x[:, :, i, :, :].squeeze(2)
-            y[:, :, i, :, :] = model(x_2d).unsqueeze(2)
+            y[:, :, i, :, :] = model(x_2d)
+        # Infer on y-axis
+        for i in range(x.shape[3]):
+            x_2d = x[:, :, :, i, :].squeeze(3)
+            y[:, :, :, i, :] = model(x_2d)
+        # Infer on z-axis
+        for i in range(x.shape[4]):
+            x_2d = x[:, :, :, :, i]
+            y[:, :, :, :, i] = model(x_2d)
         return y
     else:
         return model(x)
 
 
 def main():
-    r"""Main function."""
-    # arguments
     args = get_args()
 
     print("Command line arguments:")
@@ -50,8 +57,7 @@ def main():
 
     # Load model and its checkpoint
     model = load_model_from_checkpoint(cfg.inference.checkpoint_dir, **cfg.model)
-
-    test_dataset = OsaDataset(cfg.dataset.valid_path, cfg.dataset.input_labels, cfg.dataset.output_label,
+    test_dataset = OsaDataset(cfg.dataset.test_path, cfg.dataset.input_labels, cfg.dataset.output_label,
                               False, cfg.dataset.crop_size)
     test_dataloader = DataLoader(test_dataset, 1, shuffle=False, num_workers=cfg.dataset.dataloader_workers,
                                  pin_memory=True)
@@ -69,10 +75,11 @@ def main():
         with torch.no_grad():
             for label, x_test in x_tests.items():
                 start = time()
-                prediction = infer(model, x_test, cfg.inference.do_2d)
+                prediction = infer(model, x_test, cfg.inference.denoise_3d_with_2d)
+                prediction = (torch.exp(prediction) - 1).squeeze().cpu().numpy()
                 end = time()
                 iterator_test.set_postfix({"Inf. time": "{:.5f}".format(end - start)})
-                predictions[label].append(torch.exp(prediction - 1).cpu().numpy())
+                predictions[label].append(prediction)
         scio.savemat(cfg.inference.output_dir + f'{i}.mat', predictions)
 
 

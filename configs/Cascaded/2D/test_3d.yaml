@@ -1,0 +1,13 @@
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  output_label: 'x1e9'
+  test_path: '../../Dataset/MCX/3D/test/homo/'
+
+model:
+  architecture: 'Cascaded'
+  Cascaded:
+    num_dncnn: 3
+inference:
+  output_dir: './results/homo-3d/'
+  checkpoint_dir: './final_results/cascaded_dncnn/cascaded_dncnn_final.pt'
+  denoise_3d_with_2d: True
