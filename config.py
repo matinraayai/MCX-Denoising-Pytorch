@@ -191,7 +191,6 @@ def get_default_training_cfg():
     # gradient clipping type; for L-inf, please specify .inf
     _C.solver.clip_gradients.norm_type = 2.0
 
-
     _C.checkpoint_dir = ''
     _C.visualize = True
     # # -----------------------------------------------------------------------------
@@ -209,35 +208,7 @@ def get_default_training_cfg():
     _C.inference.checkpoint_dir = ''
 
     _C.inference.denoise_3d_with_2d = True
-    # _C.INFERENCE.OUTPUT_NAME = 'result'
-    #
-    # _C.INFERENCE.PAD_SIZE = []
-    #
-    # _C.INFERENCE.STRIDE = [4, 128, 129]
-    #
-    # # Blending function for overlapping inference.
-    # _C.INFERENCE.BLENDING = 'gaussian'
-    #
-    # _C.INFERENCE.AUG_MODE = 'mean'
-    # _C.INFERENCE.AUG_NUM = 4
-    #
-    # # Run the model forward pass with model.eval() if DO_EVAL is True, else
-    # # run with model.train(). Layers like batchnorm and dropout will be affected.
-    # _C.INFERENCE.DO_EVAL = True
-    #
-    # _C.INFERENCE.DO_3D = True
-    #
-    # # If not None then select channel of output
-    # _C.INFERENCE.MODEL_OUTPUT_ID = [None]
-    #
-    # # Number of test workers
-    # _C.INFERENCE.TEST_NUM = 1
-    #
-    # # Test worker id
-    # _C.INFERENCE.TEST_ID = 0
-    #
-    # # Batchsize for inference
-    # _C.INFERENCE.SAMPLES_PER_BATCH = 32
+
     return _C
 
 
@@ -284,9 +255,8 @@ def read_training_cfg_file(config_file_path):
     cfg.update()
     cfg.merge_from_file(config_file_path)
     # Logic to switch to 2D/3D loss function for SSIM
-    # TODO: make this better
     model_architecture = cfg.model.architecture
-    cfg.loss.ssim.dim = getattr(cfg.model, model_architecture).do_3d
+    cfg.loss.ssim.dim = 3 if getattr(cfg.model, model_architecture).do_3d else 2
     cfg.freeze()
     return cfg
 
