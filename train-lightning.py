@@ -43,9 +43,7 @@ class TrainLightningModule(LightningModule):
         #     print(noise_map.shape)
         #     x_batch_train = torch.cat([x_batch_train, noise_map], dim=1)
         y_hat = self.model(x)
-        loss = self.loss(y_hat, y)
-        self.log('batch_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        return self.loss(y_hat, y)
+        return self.loss(y, y_hat)
 
     def validation_step(self, batch, batch_idx):
         _, x, y = batch
@@ -56,7 +54,7 @@ class TrainLightningModule(LightningModule):
         mse_loss = mse_criterion(y, y_hat)
         ssim_loss = ssim_criterion(y, y_hat)
         psnr_loss = psnr_criterion(y, y_hat)
-        self.log_dict({'MSE': mse_loss, 'SSIM': ssim_loss, 'PSNR': psnr_loss})
+        self.log_dict({'MSE': mse_loss, 'SSIM': ssim_loss, 'PSNR': psnr_loss}, prog_bar=True, logger=True, on_epoch=True)
 
     def configure_optimizers(self):
         optimizer = build_optimizer(self.cfg, self.model)
@@ -96,7 +94,7 @@ def main():
     trainer = Trainer(default_root_dir=".",
                       gpus=-1, num_nodes=1, max_epochs=cfg.solver.total_iterations, accelerator='ddp',
                       plugins=DDPPlugin(find_unused_parameters=False),
-                      logger=TensorBoardLogger(save_dir=cfg.checkpoint_dir, name='experiment'),
+                      logger=TensorBoardLogger(save_dir=cfg.checkpoint_dir, name=cfg.experiment_name),
                       callbacks=[ModelCheckpoint(monitor='SSIM')])
     trainer.fit(module)
 

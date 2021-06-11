@@ -4,8 +4,9 @@ Borrowed from https://github.com/zudi-lin/pytorch_connectomics/
 """
 import torch
 import torch.nn as nn
-from .model import UNet, CascadedDnCNNWithUNet, DRUNet, DnCNN, ResidualDnCNN
-from .loss import SSIM, PSNR, VGGLoss
+from .model import CascadedDnCNNWithUNet
+from .model import UNet, DRUNet, DnCNN, ResidualDnCNN
+from .loss import SSIM, PSNR, VGGLoss, WeightedThresholdMSE
 
 
 def get_regularizer(reg_opts=()):
@@ -45,8 +46,10 @@ def get_loss(loss_opt=(), **kwargs):
             out.append(nn.MSELoss())
         elif opt == 'mae':
             out.append(nn.L1Loss())
+        elif opt == 'wmse':
+            out.append(WeightedThresholdMSE(**kwargs['wmse']))
         elif opt == 'ssim':
-            out.append(SSIM(kwargs['ssim']))
+            out.append(SSIM(**kwargs['ssim']))
         elif opt == 'psnr':
             out.append(PSNR())
         elif opt == 'vggloss':

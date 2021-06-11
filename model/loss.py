@@ -91,6 +91,18 @@ def psnr(img1, img2):
     return 20 * torch.log10(40.0 / torch.sqrt(mse))
 
 
+class WeightedThresholdMSE(nn.Module):
+    def __init__(self, weight=40, threshold=0.001):
+        super(WeightedThresholdMSE, self).__init__()
+        self.weight = weight
+        self.threshold = threshold
+
+    def forward(self, x, y):
+        with torch.no_grad():
+            mask = torch.where(x < self.threshold, self.weight, 1)
+        return torch.sum(mask * (x - y) ** 2) / x.numel()
+
+
 class VGGLoss(nn.Module):
     def __init__(self):
         super(VGGLoss, self).__init__()

@@ -97,6 +97,12 @@ def get_default_training_cfg():
 
     _C.loss.ssim.dim = 2
 
+    _C.loss.wmse = CfgNode()
+
+    _C.loss.wmse.weight = 40
+
+    _C.loss.wmse.threshold = 0.01
+
     _C.loss.size_average = True
 
     # -----------------------------------------------------------------------------
@@ -147,7 +153,7 @@ def get_default_training_cfg():
     # works when a pretrained checkpoint is loaded (default: False).
     _C.solver.iteration_restart = False
 
-    _C.solver.base_lr = 0.001
+    _C.solver.base_lr = 0.0001
 
     _C.solver.bias_lr_factor = 1.0
 
@@ -193,6 +199,7 @@ def get_default_training_cfg():
 
     _C.checkpoint_dir = ''
     _C.visualize = True
+    _C.experiment_name = ''
     # # -----------------------------------------------------------------------------
     # # Inference
     # # -----------------------------------------------------------------------------
