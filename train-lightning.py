@@ -95,7 +95,7 @@ def main():
                       gpus=-1, num_nodes=1, max_epochs=cfg.solver.total_iterations, accelerator='ddp',
                       plugins=DDPPlugin(find_unused_parameters=False),
                       logger=TensorBoardLogger(save_dir=cfg.checkpoint_dir, name=cfg.experiment_name),
-                      callbacks=[ModelCheckpoint(monitor='SSIM')])
+                      callbacks=[ModelCheckpoint(save_top_k=-1)])
     trainer.fit(module)
 
 
