@@ -6,21 +6,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn.init as init
 from .layers import ResidualBlock
-
-
-# TODO: Despite not being of use for now, play around with the parameters and instantiations to see if we get a better
-# result in the final model
-# For now, do not use this.
-def _weights_init(m):
-    if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
-        init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
-    if isinstance(m, nn.BatchNorm2d):
-        init.constant_(m.weight, 1)
-        init.constant_(m.bias, 0)
+from .initialization import init_weights
 
 
 class UNet(nn.Module):
-    def __init__(self, do_3d=False, activation_fn='F.relu', **kwargs):
+    def __init__(self, do_3d=False, activation_fn='F.relu', init_policy=None, **kwargs):
         super(UNet, self).__init__()
         conv_layer = nn.Conv3d if do_3d else nn.Conv2d
         norm_layer = nn.BatchNorm3d if do_3d else nn.BatchNorm2d
@@ -64,6 +54,8 @@ class UNet(nn.Module):
         self.up0e_norm = norm_layer(64)
         self.last_layer = conv_layer(64, 1, 1)
 
+        self.apply(lambda m: init_weights(m, init_policy))
+
     def forward(self, x):
         down0a = self.activation_fn(self.down0a_norm(self.down0a(x)))
         down0b = self.activation_fn(self.down0b_norm(self.down0b(down0a)))
@@ -90,7 +82,7 @@ class UNet(nn.Module):
 class DnCNN(nn.Module):
     def __init__(self, do_3d=False, kernel_size=3, padding=1, padding_mode='replicate', input_channels=1,
                  output_channels=1,
-                 inter_kernel_channel=64, num_layers=17, activation_fn='F.relu'):
+                 inter_kernel_channel=64, num_layers=17, activation_fn='F.relu', init_policy=None):
         super(DnCNN, self).__init__()
         self.num_layers = num_layers
         self.activation_fn = eval(activation_fn)
@@ -114,6 +106,7 @@ class DnCNN(nn.Module):
                                                          kernel_size,
                                                          padding_mode=padding_mode,
                                                          padding=padding))
+        self.apply(lambda m: init_weights(m, init_policy))
 
     def forward(self, x):
         output = self.activation_fn(self.conv1(x))
@@ -131,7 +124,7 @@ class ResidualDnCNN(nn.Module):
                  kernel_size=3,
                  padding_mode='replicate',
                  padding=1,
-                 num_layers=17, activation_fn='nn.ReLU(inplace=True)'):
+                 num_layers=17, activation_fn='nn.ReLU(inplace=True)', init_policy=None):
         super(ResidualDnCNN, self).__init__()
         self.num_layers = num_layers
         self.activation_fn = eval(activation_fn)
@@ -152,6 +145,7 @@ class ResidualDnCNN(nn.Module):
         self.__setattr__(f"conv{num_layers}", conv_layer(inter_kernel_channel, out_channels,
                                                          kernel_size,
                                                          padding_mode=padding_mode, padding=padding))
+        self.apply(lambda m: init_weights(m, init_policy))
 
     def forward(self, x):
         output_initial = self.activation_fn(self.conv1(x))
@@ -162,13 +156,15 @@ class ResidualDnCNN(nn.Module):
 
 
 class CascadedDnCNNWithUNet(nn.Module):
-    def __init__(self, do_3d=False, num_dncnn=1, output_channels=1, num_dncnn_layers=17, activation_fn='F.relu'):
+    def __init__(self, do_3d=False, num_dncnn=1, output_channels=1, num_dncnn_layers=17, activation_fn='F.relu',
+                 init_policy=None):
         super(CascadedDnCNNWithUNet, self).__init__()
         self.num_dncnn = num_dncnn
         for num in range(self.num_dncnn):
             self.__setattr__(f"dncnn{num}", DnCNN(output_channels=output_channels, do_3d=do_3d,
-                                                  num_layers=num_dncnn_layers, activation_fn=activation_fn))
-        self.unet = UNet(do_3d=do_3d)
+                                                  num_layers=num_dncnn_layers, activation_fn=activation_fn,
+                                                  init_policy=init_policy))
+        self.unet = UNet(do_3d=do_3d, init_policy=init_policy)
 
     def forward(self, x):
         for num in range(self.num_dncnn):
@@ -179,7 +175,7 @@ class CascadedDnCNNWithUNet(nn.Module):
 class DRUNet(nn.Module):
     def __init__(self, in_nc=1, out_nc=1,
                  res_block_channels=None,
-                 num_res_blocks=4, activation_function='F.relu'):
+                 num_res_blocks=4, activation_function='F.relu', init_policy=None):
         super(DRUNet, self).__init__()
         if res_block_channels is None:
             res_block_channels = [64, 128, 256, 512]
@@ -217,6 +213,8 @@ class DRUNet(nn.Module):
         self.m_up1 = upsample_block(res_block_channels[1], res_block_channels[0])
 
         self.m_tail = nn.Conv2d(res_block_channels[0], out_nc, bias=False, kernel_size=3, stride=1, padding=1)
+
+        self.apply(lambda m: init_weights(m, init_policy))
 
     def forward(self, x0):
         x1 = self.activation_fn(self.m_head(x0))
