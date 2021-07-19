@@ -4,6 +4,8 @@ Borrowed from https://github.com/zudi-lin/pytorch_connectomics/
 """
 import os
 from os import cpu_count
+
+import torch.cuda
 from yacs.config import CfgNode
 
 
@@ -13,12 +15,14 @@ def get_default_training_cfg():
     # -----------------------------------------------------------------------------
     _C = CfgNode()
 
+    _C.num_gpus = torch.cuda.device_count()
+
     # -----------------------------------------------------------------------------
     # Model
     # -----------------------------------------------------------------------------
     _C.model = CfgNode()
 
-    _C.model.starting_checkpoint = ''
+    _C.model.starting_checkpoint = None
 
     _C.model.architecture = 'DnCNN'
 
@@ -66,10 +70,14 @@ def get_default_training_cfg():
 
     _C.model.Cascaded.num_dncnn_layers = 17
 
-    _C.model.Cascaded.activation_fn = 'F.relu'
+    _C.model.Cascaded.dncnn_activation_fn = 'F.relu'
+
+    _C.model.Cascaded.unet_activation_fn = 'nn.Identity()'
 
     # DRUNet Specific arguments:
     _C.model.DRUNet = CfgNode()
+
+    _C.model.DRUNet.do_3d = False
 
     _C.model.DRUNet.num_res_blocks = 4
 
@@ -120,7 +128,7 @@ def get_default_training_cfg():
 
     _C.dataset.output_label = 'x1e9'
 
-    _C.dataset.dataloader_workers = cpu_count() - 1
+    _C.dataset.dataloader_workers = cpu_count() // _C.num_gpus
 
     _C.dataset.crop_size = None
 
@@ -139,9 +147,9 @@ def get_default_training_cfg():
     # -----------------------------------------------------------------------------
     _C.solver = CfgNode()
 
-    _C.solver.batch_size = 30
+    _C.solver.batch_size = 32
 
-    _C.solver.total_iterations = 40000
+    _C.solver.total_iterations = 1000
     # Specify the learning rate scheduler.
     _C.solver.lr_scheduler_name = "MultiStepLR"
 
