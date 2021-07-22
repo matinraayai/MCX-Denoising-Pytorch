@@ -1,0 +1,29 @@
+checkpoint_dir: './checkpoints/activation-function/3D/cascaded/'
+experiment_name: 'x1e5-relu'
+num_gpus: 1
+num_nodes: 1
+accelerator: 'ddp'
+
+dataset:
+  input_labels: ['x1e5']
+  valid_labels: ['x1e5']
+  output_label: 'x1e9'
+  train_path: 'data/train/3D/64x64x64'
+  valid_path: 'data/test/3D/refractive-64x64x64'
+
+model:
+  architecture: 'Cascaded'
+  Cascaded:
+    do_3d: True
+    num_dncnn: 1
+    num_dncnn_layers: 17
+    unet_activation_fn: 'F.relu'
+loss:
+  loss_option: ['MSE',]
+
+solver:
+  batch_size: 4
+  base_lr: 1e-5
+  total_iterations: 500
+  iteration_restart: False
+visualize: False
