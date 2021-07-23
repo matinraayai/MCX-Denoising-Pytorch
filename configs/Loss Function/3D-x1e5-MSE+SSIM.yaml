@@ -4,6 +4,7 @@ num_gpus: 1
 num_nodes: 1
 accelerator: 'ddp'
 
+
 dataset:
   input_labels: ['x1e5']
   valid_labels: ['x1e5']
@@ -19,6 +20,7 @@ model:
     num_dncnn_layers: 17
 loss:
   loss_option: ['SSIM','MSE']
+  loss_weight: [-1, 1]
 
 solver:
   batch_size: 4

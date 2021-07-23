@@ -19,6 +19,7 @@ model:
     num_dncnn_layers: 17
 loss:
   loss_option: ['SSIM', 'MAE']
+  loss_weight: [-1, 1]
 
 solver:
   batch_size: 4
