@@ -19,6 +19,20 @@ def get_default_training_cfg():
 
     _C.num_nodes = 1
 
+    _C.checkpoint_dir = ''
+
+    _C.visualize = False
+
+    _C.experiment_name = ''
+
+    _C.accelerator = None
+
+    # If True, sets every seed in the training to 1 for reproducibility
+    _C.seed_everything = True
+
+    # Seed to use if seed_everything is set to True
+    _C.seed = 1
+
     # -----------------------------------------------------------------------------
     # Model
     # -----------------------------------------------------------------------------
@@ -38,6 +52,8 @@ def get_default_training_cfg():
     _C.model.DnCNN.num_layers = 17
 
     _C.model.DnCNN.activation_fn = 'F.relu'
+
+    _C.model.DnCNN.padding_mode = 'reflect'
 
     _C.model.DnCNN.kernel_size = 3
 
@@ -75,6 +91,8 @@ def get_default_training_cfg():
     _C.model.Cascaded.dncnn_activation_fn = 'F.relu'
 
     _C.model.Cascaded.unet_activation_fn = 'nn.Identity()'
+
+    _C.model.Cascaded.padding_mode = 'reflect'
 
     # DRUNet Specific arguments:
     _C.model.DRUNet = CfgNode()
@@ -130,6 +148,8 @@ def get_default_training_cfg():
 
     _C.dataset.output_label = 'x1e9'
 
+    _C.dataset.valid_labels = ['x1e5']
+
     _C.dataset.dataloader_workers = cpu_count() // _C.num_gpus
 
     _C.dataset.crop_size = None
@@ -154,9 +174,6 @@ def get_default_training_cfg():
     _C.solver.total_iterations = 1000
     # Specify the learning rate scheduler.
     _C.solver.lr_scheduler_name = "MultiStepLR"
-
-    # Save a checkpoint after every this number of iterations.
-    _C.solver.iteration_save = 1
 
     # Whether or not to restart training from iteration 0 regardless
     # of the 'iteration' key in the checkpoint file. This option only
@@ -189,10 +206,6 @@ def get_default_training_cfg():
 
     _C.solver.warmup_method = 'linear'
 
-    # Number of samples per batch across all machines.
-    # If we have 16 GPUs and IMS_PER_BATCH = 32,
-    # each GPU will see 2 images per batch.
-    _C.solver.samples_per_batch = 16
 
     # Gradient clipping
     _C.solver.clip_gradients = CfgNode({"enabled": False})
@@ -207,19 +220,11 @@ def get_default_training_cfg():
     # gradient clipping type; for L-inf, please specify .inf
     _C.solver.clip_gradients.norm_type = 2.0
 
-    _C.checkpoint_dir = ''
-    _C.visualize = True
-    _C.experiment_name = ''
     # # -----------------------------------------------------------------------------
     # # Inference
     # # -----------------------------------------------------------------------------
     _C.inference = CfgNode()
-    #
-    # _C.INFERENCE.INPUT_SIZE = []
-    # _C.INFERENCE.OUTPUT_SIZE = []
-    #
-    # _C.INFERENCE.INPUT_PATH = ""
-    # _C.INFERENCE.IMAGE_NAME = ""
+
     _C.inference.output_dir = "./results/"
 
     _C.inference.checkpoint_dir = ''

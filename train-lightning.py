@@ -1,4 +1,4 @@
-import torch
+import pytorch_lightning
 from torch.utils.data import DataLoader
 from data.dataset import OsaDataset
 from model.builder import Criterion, get_model
@@ -26,10 +26,10 @@ class TrainLightningModule(LightningModule):
         super().__init__()
         self.cfg = cfg
         self.model = get_model(**cfg.model)
-        self.loss = Criterion(**cfg.loss).to(self.device)
-        if cfg.model.starting_checkpoint:
-            state_dict = torch.load(cfg.model.starting_checkpoint)
-            self.model.load_state_dict(state_dict.state_dict())
+        self.train_loss = Criterion(**cfg.loss).to(self.device)
+        self.validation_losses = {'MSE': nn.MSELoss(),
+                                  'SSIM': SSIM(**self.cfg.loss.ssim).to(self.device),
+                                  'PSNR': PSNR()}
 
     def forward(self, x):
         return self.model(x)
@@ -43,18 +43,13 @@ class TrainLightningModule(LightningModule):
         #     print(noise_map.shape)
         #     x_batch_train = torch.cat([x_batch_train, noise_map], dim=1)
         y_hat = self.model(x)
-        return self.loss(y, y_hat)
+        return self.train_loss(y, y_hat)
 
     def validation_step(self, batch, batch_idx):
         _, x, y = batch
-        mse_criterion = nn.MSELoss()
-        ssim_criterion = SSIM(**self.cfg.loss.ssim).to(self.device)
-        psnr_criterion = PSNR()
         y_hat = self.model(x)
-        mse_loss = mse_criterion(y, y_hat)
-        ssim_loss = ssim_criterion(y, y_hat)
-        psnr_loss = psnr_criterion(y, y_hat)
-        self.log_dict({'MSE': mse_loss, 'SSIM': ssim_loss, 'PSNR': psnr_loss}, prog_bar=True, logger=True, on_epoch=True)
+        loss_dict = {loss_key: loss_module(y, y_hat) for loss_key, loss_module in self.validation_losses.items()}
+        self.log_dict(loss_dict, prog_bar=True, logger=True, on_epoch=True)
 
     def configure_optimizers(self):
         optimizer = build_optimizer(self.cfg, self.model)
@@ -71,8 +66,8 @@ class TrainLightningModule(LightningModule):
         return train_dataloader
 
     def val_dataloader(self):
-        valid_dataset = OsaDataset(self.cfg.dataset.valid_path, ['x1e5'],
-                                   self.cfg.dataset.output_label, True, self.cfg.dataset.crop_size)
+        valid_dataset = OsaDataset(self.cfg.dataset.valid_path, self.cfg.dataset.valid_labels,
+                                   self.cfg.dataset.output_label, True, None)
         valid_dataloader = DataLoader(valid_dataset, 1, shuffle=False,
                                       num_workers=self.cfg.dataset.dataloader_workers,
                                       pin_memory=True)
@@ -88,14 +83,20 @@ def main():
     cfg = read_training_cfg_file(args.config_file)
     print("Configuration details:")
     print(cfg)
+    # Fix seed for determinism
+    if cfg.seed_everything:
+        pytorch_lightning.seed_everything(cfg.seed)
     module = TrainLightningModule(cfg)
     if not os.path.exists(cfg.checkpoint_dir):
         os.makedirs(cfg.checkpoint_dir, exist_ok=True)
     trainer = Trainer(default_root_dir=".",
-                      gpus=-1, num_nodes=1, max_epochs=cfg.solver.total_iterations, accelerator='ddp',
+                      resume_from_checkpoint=cfg.model.starting_checkpoint,
+                      gpus=cfg.num_gpus, num_nodes=cfg.num_nodes, max_epochs=cfg.solver.total_iterations,
+                      accelerator=cfg.accelerator,
                       plugins=DDPPlugin(find_unused_parameters=False),
                       logger=TensorBoardLogger(save_dir=cfg.checkpoint_dir, name=cfg.experiment_name),
-                      callbacks=[ModelCheckpoint(save_top_k=-1)])
+                      callbacks=[ModelCheckpoint(save_top_k=-1,
+                                                 filename='{epoch:04d}-{MSE:.4f}-{SSIM:.4f}-{PSNR:.4f}')])
     trainer.fit(module)
 
 
