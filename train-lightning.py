@@ -84,17 +84,19 @@ def main():
     print("Configuration details:")
     print(cfg)
     # Fix seed for determinism
-    if cfg.seed_everything:
-        pytorch_lightning.seed_everything(cfg.seed)
+    if cfg.pytorch_lightning.seed_everything:
+        pytorch_lightning.seed_everything(cfg.pytorch_lightning.seed)
     module = TrainLightningModule(cfg)
-    if not os.path.exists(cfg.checkpoint_dir):
-        os.makedirs(cfg.checkpoint_dir, exist_ok=True)
+    if not os.path.exists(cfg.pytorch_lightning.checkpoint_dir):
+        os.makedirs(cfg.pytorch_lightning.checkpoint_dir, exist_ok=True)
     trainer = Trainer(default_root_dir=".",
-                      resume_from_checkpoint=cfg.model.starting_checkpoint,
-                      gpus=cfg.num_gpus, num_nodes=cfg.num_nodes, max_epochs=cfg.solver.total_iterations,
-                      accelerator=cfg.accelerator,
+                      resume_from_checkpoint=cfg.pytorch_lightning.resume_training_checkpoint,
+                      gpus=cfg.pytorch_lightning.num_gpus,
+                      num_nodes=cfg.pytorch_lightning.num_nodes, max_epochs=cfg.solver.total_iterations,
+                      accelerator=cfg.pytorch_lightning.accelerator,
                       plugins=DDPPlugin(find_unused_parameters=False),
-                      logger=TensorBoardLogger(save_dir=cfg.checkpoint_dir, name=cfg.experiment_name),
+                      logger=TensorBoardLogger(save_dir=cfg.pytorch_lightning.checkpoint_dir,
+                                               name=cfg.pytorch_lightning.experiment_name),
                       callbacks=[ModelCheckpoint(save_top_k=-1,
                                                  filename='{epoch:04d}-{MSE:.4f}-{SSIM:.4f}-{PSNR:.4f}')])
     trainer.fit(module)

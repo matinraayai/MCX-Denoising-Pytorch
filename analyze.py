@@ -10,7 +10,7 @@ from config import read_analysis_cfg_file
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Script for analysing filtering results in 3D."
+    parser = argparse.ArgumentParser(description="Script for analysing filtering results for both 2D and 3D."
                                                  "it calculates both the metric results and cross section statistics.")
     parser.add_argument('--config-file', type=str, help='configuration file (yaml). '
                                                         'Refer to config.py and the config/analysis directory'
@@ -18,25 +18,40 @@ def get_args():
     return parser.parse_args()
 
 
-def compute_cross_section_stats(fluence_volume, x_cross_section=50, y_cross_section=50, zero_nans=True,
-                                zero_infs=True):
+def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 50), zero_nans=True, zero_infs=True):
     """
     https://3.basecamp.com/3261719/buckets/447257/todos/1194253648#__recording_1236125346
     Computes the SNR, log10 of mean and log10 of std over a cross section on the x,y-axis of the fluence volume.
     :param fluence_volume: A stack of an identical 3D simulation domain.
-    :param x_cross_section: x cross section voxel
-    :param y_cross_section: y cross section voxel
+    :param cross_section_coordinates: A tuple specifying the location of the cross section. In case of a 2D fluence
+    map, only the first element is used to select x cross section
     :param zero_nans: set the nans in the cross section to zero
     :param zero_infs: set the +/-infs in the cross section to zero
     :return: a dictionary, containing log10 of mean, log10 of std, and the SNR of the z-cross section
     """
-    num_samples, x_axis_len, y_axis_len, z_axis_len = fluence_volume.shape[0], \
-                                                      fluence_volume.shape[1], \
-                                                      fluence_volume.shape[2], \
-                                                      fluence_volume.shape[3]
-    cross_section = np.zeros((num_samples, z_axis_len), dtype=np.float64)
-    for i in range(num_samples):
-        cross_section[i] = fluence_volume[i, x_cross_section, y_cross_section, :].squeeze()
+    fluence_volume = fluence_volume.squeeze()
+    if len(fluence_volume.shape) == 3:
+        num_samples, x_axis_len, y_axis_len = fluence_volume.shape[0], \
+                                              fluence_volume.shape[1], \
+                                              fluence_volume.shape[2]
+        cross_section = np.zeros((num_samples, y_axis_len), dtype=np.float64)
+        x_cross_section = cross_section_coordinates[0]
+        for i in range(num_samples):
+            cross_section[i] = fluence_volume[i, x_cross_section, :].squeeze()
+
+    elif len(fluence_volume.shape) == 4:
+        num_samples, x_axis_len, y_axis_len, z_axis_len = fluence_volume.shape[0], \
+                                                          fluence_volume.shape[1], \
+                                                          fluence_volume.shape[2], \
+                                                          fluence_volume.shape[3]
+
+        cross_section = np.zeros((num_samples, z_axis_len), dtype=np.float64)
+        x_cross_section, y_cross_section = cross_section_coordinates
+        for i in range(num_samples):
+            cross_section[i] = fluence_volume[i, x_cross_section, y_cross_section, :].squeeze()
+    else:
+        raise AssertionError("Fluence map either has to be a 3D tensor (for 2D simulations) or 4D tensor "
+                             "(for 3D simulations)")
     means = np.log10(cross_section.mean(axis=0))
     stds = np.log10(cross_section.std(axis=0))
     if zero_nans:
@@ -88,10 +103,10 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
         linestyles = ['solid', 'dotted', 'dashed', 'dashdot', 'loosely dotted', 'loosely dashed', 'densely dashed']
         for i, (data_name, data) in enumerate(stat_dicts.items()):
             if label in data:
-                x_values = np.arange(0, len(data[label][stat_name]))
-                y_values = data[label][stat_name]
-                print(x_values.shape, y_values.shape)
-                plt.plot(x_values, y_values, color=color, label=f"{plot_label}_{data_name}", linestyle=linestyles[i])
+                if label != 'x1e9':
+                    x_values = np.arange(0, len(data[label][stat_name]))
+                    y_values = data[label][stat_name]
+                    plt.plot(x_values, y_values, color=color, label=f"{plot_label}_{data_name}", linestyle=linestyles[i])
 
     def create_stat_plot(stat_name, x_axis_label, y_axis_label, legend=False):
         """
@@ -147,13 +162,14 @@ def print_snr_improvements(datasets_stats, labels):
             if data != "simulation":
                 print(f"{label}: ")
                 if label in datasets_stats[data]:
-                    snr, non_zero_snr = calculate_mean_snr_improvements(datasets_stats[data][label]["snr"],
-                                                                        datasets_stats["simulation"][label]["snr"])
+                    snr, non_zero_snr = calculate_mean_snr_improvements(datasets_stats["simulation"][label]["snr"],
+                                                                        datasets_stats[data][label]["snr"])
                     print(f"{data} SNR: {snr}, non-zero SNR improvement: {non_zero_snr} ")
 
 
 def loss_analysis(datasets, input_labels, output_label):
-    loss_types = {'MSE': MSELoss(), 'SSIM': SSIM(dim=3).cuda(), 'PSNR': PSNR()}
+    input_dim = 3 if len(datasets["simulation"][output_label].shape) == 4 else 2
+    loss_types = {'MSE': MSELoss(), 'SSIM': SSIM(dim=input_dim).cuda(), 'PSNR': PSNR()}
 
     loss_stats = {label: {data: {loss_type: 0 for loss_type in loss_types.keys()}
                           for data in datasets if data != 'simulation'}
@@ -162,11 +178,11 @@ def loss_analysis(datasets, input_labels, output_label):
     for label in input_labels:
         for data in datasets:
             if data != "simulation":
-                targets = torch.from_numpy(datasets["simulation"][output_label]).cuda()
-                preds = torch.from_numpy(datasets[data][label]).cuda()
+                targets = torch.from_numpy(datasets["simulation"][output_label].squeeze()).cuda()
+                preds = torch.from_numpy(datasets[data][label].squeeze()).cuda()
                 for j in range(len(targets)):
-                    t = torch.log(targets[j].unsqueeze(0).unsqueeze(0).float() + 1.)
-                    p = torch.log(preds[j].unsqueeze(0).unsqueeze(0).float() + 1.)
+                    t = torch.log1p(targets[j].unsqueeze(0).unsqueeze(0).float())
+                    p = torch.log1p(preds[j].unsqueeze(0).unsqueeze(0).float())
                     for loss_type, loss_module in loss_types.items():
                         loss_stats[label][data][loss_type] += loss_module(t, p) / len(targets)
     return loss_stats
@@ -207,15 +223,15 @@ def main():
     datasets_stats = {}
     for dataset_name, data in datasets.items():
         datasets_stats[dataset_name] = {label: compute_cross_section_stats(datasets[dataset_name][label],
-                                                                           x_cross_section=cfg.cross_section.x,
-                                                                           y_cross_section=cfg.cross_section.y,
+                                                                           cross_section_coordinates=(cfg.cross_section.x,
+                                                                                                      cfg.cross_section.y),
                                                                            zero_nans=cfg.zero_nans,
                                                                            zero_infs=cfg.zero_infs)
                                         for label in data.keys()}
     print("Done calculating. Plotting statistics...")
     plot_stats(datasets_stats, cfg.cross_section.x, cfg.cross_section.y,
                cfg.dataset.input_labels + [cfg.dataset.output_label],
-               cfg.figures.fig_type, cfg.figures.output_path)
+               cfg.figures.fig_type, cfg.output_path)
     print("Done plotting.")
 
     print_snr_improvements(datasets_stats, cfg.dataset.input_labels)

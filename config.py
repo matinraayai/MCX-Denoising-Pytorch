@@ -9,228 +9,271 @@ import torch.cuda
 from yacs.config import CfgNode
 
 
-def get_default_training_cfg():
-    # -----------------------------------------------------------------------------
-    # Config definition
-    # -----------------------------------------------------------------------------
-    _C = CfgNode()
+def add_model_cfg(cfg: CfgNode):
+    """
+    Adds model arguments to a YACS CfgNode object
+    :param cfg: Config node to be used for a specific task
+    :return: The same config node, with model config node added
+    """
+    cfg.model = CfgNode()
 
-    _C.num_gpus = torch.cuda.device_count()
+    cfg.model.checkpoint = None
 
-    _C.num_nodes = 1
+    cfg.model.architecture = 'DnCNN'
 
-    _C.checkpoint_dir = ''
-
-    _C.visualize = False
-
-    _C.experiment_name = ''
-
-    _C.accelerator = None
-
-    # If True, sets every seed in the training to 1 for reproducibility
-    _C.seed_everything = True
-
-    # Seed to use if seed_everything is set to True
-    _C.seed = 1
-
-    # -----------------------------------------------------------------------------
-    # Model
-    # -----------------------------------------------------------------------------
-    _C.model = CfgNode()
-
-    _C.model.starting_checkpoint = None
-
-    _C.model.architecture = 'DnCNN'
-
-    _C.model.noise_map = False
+    # Whether to use ACSConvertor to convert a 2D convolution-based model to 3D for transfer learning
+    cfg.model.use_ACSConvertor = False
 
     # DnCNN-specific arguments:
-    _C.model.DnCNN = CfgNode()
+    cfg.model.DnCNN = CfgNode()
 
-    _C.model.DnCNN.do_3d = False
+    cfg.model.DnCNN.do_3d = False
 
-    _C.model.DnCNN.num_layers = 17
+    cfg.model.DnCNN.num_layers = 17
 
-    _C.model.DnCNN.activation_fn = 'F.relu'
+    cfg.model.DnCNN.activation_fn = 'F.relu'
 
-    _C.model.DnCNN.padding_mode = 'reflect'
+    cfg.model.DnCNN.padding_mode = 'reflect'
 
-    _C.model.DnCNN.kernel_size = 3
+    cfg.model.DnCNN.kernel_size = 3
 
-    _C.model.DnCNN.inter_kernel_channel = 64
+    cfg.model.DnCNN.inter_kernel_channel = 64
 
     # UNet-specific arguments:
-    _C.model.UNet = CfgNode()
+    cfg.model.UNet = CfgNode()
 
-    _C.model.UNet.do_3d = False
+    cfg.model.UNet.do_3d = False
 
     # Residual DnCNN-specific arguments:
-    _C.model.ResidualDnCNN = CfgNode()
+    cfg.model.ResidualDnCNN = CfgNode()
 
-    _C.model.ResidualDnCNN.do_3d = False
+    cfg.model.ResidualDnCNN.do_3d = False
 
-    _C.model.ResidualDnCNN.num_layers = 17
+    cfg.model.ResidualDnCNN.num_layers = 17
 
-    _C.model.ResidualDnCNN.activation_fn = 'F.relu'
+    cfg.model.ResidualDnCNN.activation_fn = 'F.relu'
 
-    _C.model.ResidualDnCNN.kernel_size = 3
+    cfg.model.ResidualDnCNN.kernel_size = 3
 
-    _C.model.ResidualDnCNN.inter_kernel_channel = 64
+    cfg.model.ResidualDnCNN.inter_kernel_channel = 64
 
-    _C.model.ResidualDnCNN.padding_mode = 'reflect'
+    cfg.model.ResidualDnCNN.padding_mode = 'reflect'
 
     # Cascaded DnCNN + UNet Specific arguments:
-    _C.model.Cascaded = CfgNode()
+    cfg.model.Cascaded = CfgNode()
 
-    _C.model.Cascaded.do_3d = False
+    cfg.model.Cascaded.do_3d = False
 
-    _C.model.Cascaded.num_dncnn = 1
+    cfg.model.Cascaded.num_dncnn = 1
 
-    _C.model.Cascaded.num_dncnn_layers = 17
+    cfg.model.Cascaded.num_dncnn_layers = 17
 
-    _C.model.Cascaded.dncnn_activation_fn = 'F.relu'
+    cfg.model.Cascaded.dncnn_activation_fn = 'F.relu'
 
-    _C.model.Cascaded.unet_activation_fn = 'nn.Identity()'
+    cfg.model.Cascaded.unet_activation_fn = 'nn.Identity()'
 
-    _C.model.Cascaded.padding_mode = 'reflect'
+    cfg.model.Cascaded.padding_mode = 'reflect'
 
     # DRUNet Specific arguments:
-    _C.model.DRUNet = CfgNode()
+    cfg.model.DRUNet = CfgNode()
 
-    _C.model.DRUNet.do_3d = False
+    cfg.model.DRUNet.do_3d = False
 
-    _C.model.DRUNet.num_res_blocks = 4
+    cfg.model.DRUNet.num_res_blocks = 4
 
-    _C.model.DRUNet.res_block_channels = None
+    cfg.model.DRUNet.res_block_channels = None
 
-    _C.model.DRUNet.activation_function = 'F.relu'
+    cfg.model.DRUNet.activation_function = 'F.relu'
 
-    # -----------------------------------------------------------------------------
-    # Loss Options
-    # -----------------------------------------------------------------------------
-    _C.loss = CfgNode()
+    return cfg
 
-    _C.loss.loss_option = ('MSE',)
 
-    _C.loss.loss_weight = (1.0,)
+def add_pytorch_lightning_cfg(cfg: CfgNode):
+    """
+    Adds pytorch_lightning specific arguments to a configuration node under the name "pytorch_lightning"
+    :param cfg: Config node to be used for a specific task
+    :return: The same config node, with pytorch_lightning node added
+    """
+    cfg.pytorch_lightning = CfgNode()
+    cfg.pytorch_lightning.num_gpus = torch.cuda.device_count()
 
-    _C.loss.regularizer_opt = ()
+    cfg.pytorch_lightning.num_nodes = 1
 
-    _C.loss.regularizer_weight = ()
+    cfg.pytorch_lightning.checkpoint_dir = ''
+
+    cfg.pytorch_lightning.visualize = False
+
+    cfg.pytorch_lightning.experiment_name = ''
+
+    cfg.pytorch_lightning.accelerator = None
+
+    cfg.pytorch_lightning.resume_training_checkpoint = None
+
+    # If True, sets every seed in the training to 1 for reproducibility
+    cfg.pytorch_lightning.seed_everything = True
+
+    # Seed to use if seed_everything is set to True
+    cfg.pytorch_lightning.seed = 1
+
+    return cfg
+
+
+def add_loss_cfg(cfg: CfgNode):
+    """
+    Adds loss function arguments to a configuration node under the name "loss"
+    :param cfg: Config node to be used for a specific task
+    :return: The same config node, with loss node added
+    """
+    cfg.loss = CfgNode()
+
+    cfg.loss.loss_option = ('MSE',)
+
+    cfg.loss.loss_weight = (1.0,)
+
+    cfg.loss.regularizer_opt = ()
+
+    cfg.loss.regularizer_weight = ()
 
     # SSIM specific arguments
-    _C.loss.ssim = CfgNode()
+    cfg.loss.ssim = CfgNode()
 
-    _C.loss.ssim.window_size = 11
+    cfg.loss.ssim.window_size = 11
 
-    _C.loss.ssim.dim = 2
+    cfg.loss.ssim.dim = 2
 
-    _C.loss.wmse = CfgNode()
+    cfg.loss.wmse = CfgNode()
 
-    _C.loss.wmse.weight = 40
+    cfg.loss.wmse.weight = 40
 
-    _C.loss.wmse.threshold = 0.01
+    cfg.loss.wmse.threshold = 0.01
 
-    _C.loss.size_average = True
+    cfg.loss.size_average = True
+    return cfg
 
-    # -----------------------------------------------------------------------------
-    # Dataset
-    # -----------------------------------------------------------------------------
-    _C.dataset = CfgNode()
 
-    _C.dataset.train_path = 'data/rand2d/train/'
+def add_dataset_cfg(cfg: CfgNode, num_gpus):
+    """
+    Adds dataset function arguments to a configuration node under the name "dataset"
+    :param cfg: Config node to be used for a specific task
+    :param num_gpus: Number of GPUs to be used for the task; Used to set the default argument of the dataloader_workers
+    :return: The same config node, with loss node added
+    """
+    cfg.dataset = CfgNode()
 
-    _C.dataset.valid_path = 'data/rand2d/validation/'
+    cfg.dataset.train_path = 'data/rand2d/train/'
 
-    _C.dataset.test_path = 'data/rand2d/test/'
+    cfg.dataset.valid_path = 'data/rand2d/validation/'
 
-    _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+    cfg.dataset.test_path = 'data/rand2d/test/'
 
-    _C.dataset.output_label = 'x1e9'
+    cfg.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
 
-    _C.dataset.valid_labels = ['x1e5']
+    cfg.dataset.output_label = 'x1e9'
 
-    _C.dataset.dataloader_workers = cpu_count() // _C.num_gpus
+    cfg.dataset.valid_labels = ['x1e5']
 
-    _C.dataset.crop_size = None
+    cfg.dataset.dataloader_workers = cpu_count() // num_gpus
 
-    _C.aug = CfgNode()
+    cfg.dataset.crop_size = None
+    return cfg
 
-    _C.aug.rotate = CfgNode({'enabled': True})
 
-    _C.aug.rotate.p = 0.7
+def add_aug_cfg(cfg: CfgNode):
+    """
+    Adds augmentation function arguments to a configuration node under the name "aug"
+    :param cfg: Config node to be used for a specific task
+    :return: The same config node, with aug node added
+    """
+    cfg.aug = CfgNode()
 
-    _C.aug.flip = CfgNode({'enabled': True})
+    cfg.aug.rotate = CfgNode({'enabled': True})
 
-    _C.aug.flip.p = 1.
+    cfg.aug.rotate.p = 0.7
 
-    # -----------------------------------------------------------------------------
-    # Solver
-    # -----------------------------------------------------------------------------
-    _C.solver = CfgNode()
+    cfg.aug.flip = CfgNode({'enabled': True})
 
-    _C.solver.batch_size = 32
+    cfg.aug.flip.p = 1.
 
-    _C.solver.total_iterations = 1000
+    return cfg
+
+
+def add_solver_cfg(cfg: CfgNode):
+    """
+    Adds solver function arguments to a configuration node under the name "solver"
+    :param cfg: Config node to be used for a specific task
+    :return: The same config node, with solver node added
+    """
+    cfg.solver = CfgNode()
+
+    cfg.solver.batch_size = 32
+
+    cfg.solver.total_iterations = 1000
     # Specify the learning rate scheduler.
-    _C.solver.lr_scheduler_name = "MultiStepLR"
+    cfg.solver.lr_scheduler_name = "MultiStepLR"
 
     # Whether or not to restart training from iteration 0 regardless
     # of the 'iteration' key in the checkpoint file. This option only
     # works when a pretrained checkpoint is loaded (default: False).
-    _C.solver.iteration_restart = False
+    cfg.solver.iteration_restart = False
 
-    _C.solver.base_lr = 0.0001
+    cfg.solver.base_lr = 0.0001
 
-    _C.solver.bias_lr_factor = 1.0
+    cfg.solver.bias_lr_factor = 1.0
 
-    _C.solver.weight_decay_bias = 0.0
+    cfg.solver.weight_decay_bias = 0.0
 
-    _C.solver.momentum = 0.9
+    cfg.solver.momentum = 0.9
 
     # The weight decay that's applied to parameters of normalization layers
     # (typically the affine transformation)
-    _C.solver.weight_decay = 0.0001
+    cfg.solver.weight_decay = 0.0001
 
-    _C.solver.weight_decay_norm = 0.0
+    cfg.solver.weight_decay_norm = 0.0
 
     # The iteration number to decrease learning rate by GAMMA
-    _C.solver.gamma = 0.1
+    cfg.solver.gamma = 0.1
 
     # should be a tuple like (30000,)
-    _C.solver.steps = (30000, 35000)
+    cfg.solver.steps = (30000, 35000)
 
-    _C.solver.warmup_factor = 1.0 / 1000
+    cfg.solver.warmup_factor = 1.0 / 1000
 
-    _C.solver.warmup_iters = 1000
+    cfg.solver.warmup_iters = 1000
 
-    _C.solver.warmup_method = 'linear'
-
+    cfg.solver.warmup_method = 'linear'
 
     # Gradient clipping
-    _C.solver.clip_gradients = CfgNode({"enabled": False})
+    cfg.solver.clip_gradients = CfgNode({"enabled": False})
     # Type of gradient clipping, currently 2 values are supported:
     # - "value": the absolute values of elements of each gradients are clipped
     # - "norm": the norm of the gradient for each parameter is clipped thus
     #   affecting all elements in the parameter
-    _C.solver.clip_gradients.clip_type = "value"
+    cfg.solver.clip_gradients.clip_type = "value"
     # Maximum absolute value used for clipping gradients
-    _C.solver.clip_gradients.clip_value = 1.0
+    cfg.solver.clip_gradients.clip_value = 1.0
     # Floating point number p for L-p norm to be used with the "norm"
     # gradient clipping type; for L-inf, please specify .inf
-    _C.solver.clip_gradients.norm_type = 2.0
+    cfg.solver.clip_gradients.norm_type = 2.0
+    return cfg
 
-    # # -----------------------------------------------------------------------------
-    # # Inference
-    # # -----------------------------------------------------------------------------
-    _C.inference = CfgNode()
 
-    _C.inference.output_dir = "./results/"
+def get_default_training_cfg():
+    _C = CfgNode()
+    _C = add_pytorch_lightning_cfg(_C)
+    _C = add_model_cfg(_C)
+    _C = add_loss_cfg(_C)
+    _C = add_dataset_cfg(_C, _C.pytorch_lightning.num_gpus)
+    _C = add_aug_cfg(_C)
+    _C = add_solver_cfg(_C)
+    return _C
 
-    _C.inference.checkpoint_dir = ''
 
-    _C.inference.denoise_3d_with_2d = True
-
+def get_default_inference_cfg():
+    _C = CfgNode()
+    _C = add_model_cfg(_C)
+    _C = add_dataset_cfg(_C, 1)
+    _C = add_loss_cfg(_C)
+    _C.output_dir = "./results"
     return _C
 
 
@@ -240,8 +283,6 @@ def get_default_analysis_cfg():
     :return: a YACS.CfgNode with all the default options for analysis
     """
     _C = CfgNode()
-    # If 3D or 2D analysis
-    _C.do_3d = True
     # Dataset
     _C.dataset = CfgNode()
     _C.dataset.paths = CfgNode()
@@ -278,7 +319,7 @@ def read_training_cfg_file(config_file_path):
     cfg.merge_from_file(config_file_path)
     # Logic to switch to 2D/3D loss function for SSIM
     model_architecture = cfg.model.architecture
-    cfg.loss.ssim.dim = 3 if getattr(cfg.model, model_architecture).do_3d else 2
+    cfg.loss.ssim.dim = 3 if getattr(cfg.model, model_architecture).do_3d or cfg.model.use_ACSConvertor else 2
     cfg.freeze()
     return cfg
 
