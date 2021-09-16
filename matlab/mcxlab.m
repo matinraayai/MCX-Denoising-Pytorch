@@ -3,7 +3,7 @@ function varargout=mcxlab(varargin)
 %====================================================================
 %      MCXLAB - Monte Carlo eXtreme (MCX) for MATLAB/GNU Octave
 %--------------------------------------------------------------------
-%Copyright (c) 2011-2020 Qianqian Fang <q.fang at neu.edu>
+%Copyright (c) 2011-2021 Qianqian Fang <q.fang at neu.edu>
 %                      URL: http://mcx.space
 %====================================================================
 %
@@ -154,7 +154,9 @@ function varargout=mcxlab(varargin)
 %                      'arcsine' - similar to isotropic, except the zenith angle is uniform
 %                                distribution, rather than a sine distribution.
 %                      'disk' [*] - a uniform disk source pointing along srcdir; the radius is 
-%                               set by srcparam1(1) (in grid unit)
+%                               set by srcparam1(1) (in grid unit); if srcparam1(2) is set to a non-zero
+%                               value, this source defines a ring (annulus) shaped source, with
+%                               srcparam1(2) denoting the inner circle's radius, here srcparam1(1)>=srcparam1(2)
 %                      'fourierx' [*] - a general Fourier source, the parameters are 
 %                               srcparam1: [v1x,v1y,v1z,|v2|], srcparam2: [kx,ky,phi0,M]
 %                               normalized vectors satisfy: srcdir cross v1=v2
@@ -182,6 +184,7 @@ function varargout=mcxlab(varargin)
 %                      simultaneously simulated; only works for 'pattern'
 %                      source, see cfg.srctype='pattern' for details
 %                      Example <demo_photon_sharing.m>
+%      cfg.omega: source modulation frequency (rad/s) for RF replay, 2*pi*f
 %      cfg.issrcfrom0: 1-first voxel is [0 0 0], [0]- first voxel is [1 1 1]
 %      cfg.replaydet:  only works when cfg.outputtype is 'jacobian', 'wl', 'nscat', or 'wp' and cfg.seed is an array
 %                      -1 replay all detectors and save in separate volumes (output has 5 dimensions)
@@ -214,6 +217,7 @@ function varargout=mcxlab(varargin)
 %                      'energy' - energy deposit per voxel
 %                      'jacobian' or 'wl' - mua Jacobian (replay mode), 
 %                      'nscat' or 'wp' - weighted scattering counts for computing Jacobian for mus (replay mode)
+%                      'rf' frequency-domain (FD/RF) mua Jacobian (replay mode),
 %                      for type jacobian/wl/wp, example: <demo_mcxlab_replay.m>
 %                      and  <demo_replay_timedomain.m>
 %      cfg.session:    a string for output file names (only used when no return variables)
