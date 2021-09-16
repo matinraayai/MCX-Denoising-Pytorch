@@ -14,18 +14,19 @@ function generate_data_using_cfg_lambda(cfg_lambda, output_dir, photon_list, n, 
     end
 
     % Import MCX Lab Mexfile from the top folder of the repository
-    addpath('../matlab')
+    addpath('../../matlab')
     % Create the output directory if it doesn't already exist
     if ~exist(output_dir, 'dir')
         mkdir(output_dir);
     end
 
     file_id = 0;
-    for i = 1 : n
-        fname = sprintf('%s/%d.mat', output_dir, file_id);
+    for i = 0 : n - 1
+        fname = sprintf('%s/%d.mat', output_dir, i);
         if ~overwrite
             % Keep already generated data intact if overwrite is false
             while exist(fname, 'file')
+                i = i + 1;
                 file_id = file_id + 1;
                 fname = sprintf('%s/%d.mat', output_dir, file_id);
             end

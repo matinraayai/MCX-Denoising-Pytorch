@@ -7,7 +7,7 @@ function binary_volume = random_char_in_3d_volume(volume_size)
     %       binary_volume: a binary 3D array, where 1 is part of the character and 0 is absence of character
 
     % Generate a random 2D character
-    addpath('../2D');
+    addpath(genpath('../../2D'));
     char_2d = random_char_in_2d_volume(volume_size(1:2));
     % Randomly select a z-start and z-end to give volume to the letter
     z_start = randi(volume_size(3));

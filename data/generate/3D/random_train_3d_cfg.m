@@ -1,5 +1,4 @@
-function cfg = random_3d_cfg(imsize, num_props, gpu_ids)
-    addpath('./volume')
+function cfg = random_train_3d_cfg(imsize, num_props, gpu_ids)
     % Generates a random 3D MCX simulation configuration
     % The output doesn't have a nphoton attribute which should be set manually before simulation
     [vol, maxprop] = random_3d_volume(imsize, num_props);
@@ -19,10 +18,11 @@ function cfg = random_3d_cfg(imsize, num_props, gpu_ids)
     cfg.gpuid = gpu_ids;
     cfg.autopilot = 1;
     musp = abs(randn(maxprop, 1) + 1);
-    g = zeros(maxprop, 1);
+    g = 0.1 * rand(maxprop, 1) + 0.9;
     mus = musp ./ (1 - g);
-    myprop = [abs(randn(maxprop, 1) * 0.05 + 0.01), mus, g, rand(maxprop, 1) + 1];
+    myprop = [abs(randn(maxprop, 1) * 0.05 + 0.01), mus, g, 9 * rand(maxprop, 1)];
     cfg.prop = [0 0 1 1; myprop];
     cfg.tstart = 0;
+    cfg.seed = randi(2^31 - 1);
     cfg.tend = 1e-8;
     cfg.tstep = 1e-8;
