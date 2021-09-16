@@ -1,4 +1,5 @@
 import pytorch_lightning
+import torch.nn
 from torch.utils.data import DataLoader
 from data.dataset import OsaDataset
 from model.builder import Criterion, get_model
@@ -25,7 +26,7 @@ class TrainLightningModule(LightningModule):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        self.model = get_model(**cfg.model)
+        self.model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(get_model(**cfg.model))
         self.train_loss = Criterion(**cfg.loss).to(self.device)
         self.validation_losses = {'MSE': nn.MSELoss(),
                                   'SSIM': SSIM(**self.cfg.loss.ssim).to(self.device),
@@ -54,7 +55,7 @@ class TrainLightningModule(LightningModule):
     def configure_optimizers(self):
         optimizer = build_optimizer(self.cfg, self.model)
         lr_scheduler = build_lr_scheduler(self.cfg, optimizer)
-        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler}
+        return {"optimizer": optimizer, "lr_scheduler": lr_scheduler, "monitor": "MSE"}
 
     def train_dataloader(self):
         train_augmentor = build_train_augmentor(**self.cfg.aug)
