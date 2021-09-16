@@ -19,7 +19,7 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
         elseif strcmp(type, 'use195')
             cfg_lambda = @() (get_2d_usc195_cfg(gpu_ids));
         else
-            throw(MException(fprintf('invalid data type %s', type)));
+            throw(MException(fprintf('invalid data type %s\n', type)));
         end
     elseif dim == 3
         if strcmp(type, 'train')
@@ -37,10 +37,10 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
         elseif strcmp(type, 'use195')
             cfg_lambda = @() (get_3d_usc195_cfg(gpu_ids));
         else
-            throw(MException(fprintf('invalid data type %s', type)));
+            throw(MException(fprintf('invalid data type %s\n', type)));
         end
     else
-        throw(MException(fprintf('invalid dim %d', dim)));
+        throw(MException(fprintf('invalid dim %d\n', dim)));
     end
     generate_data_using_cfg_lambda(cfg_lambda, output_dir, photon_list, n, overwrite);
 end
