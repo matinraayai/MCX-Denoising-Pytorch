@@ -12,7 +12,7 @@ def make_path_list(dir_name):
 
 
 def read_norm_sqz_from_mat_file(mat_file, label):
-    return torch.log(torch.from_numpy(mat_file[label].astype(np.float32)) + 1.).unsqueeze(0)
+    return torch.log1p(torch.from_numpy(mat_file[label].astype(np.float64))).unsqueeze(0).float()
 
 
 def random_crop(x, y, crop_size):
@@ -40,9 +40,10 @@ class OsaDataset(torch.utils.data.Dataset):
         self.crop_size = crop_size
         self.is_train = is_train
         self.augmentor = augmentor
+        self.mat_files = [spio.loadmat(path, squeeze_me=True) for path in self.paths]
 
     def __getitem_test(self, item):
-        mat_file = spio.loadmat(self.paths[item], squeeze_me=True)
+        mat_file = self.mat_files[item]
         x = {input_label: read_norm_sqz_from_mat_file(mat_file, input_label) for input_label in self.input_labels}
         y = read_norm_sqz_from_mat_file(mat_file, self.output_label)
         if self.crop_size is not None:
@@ -54,7 +55,7 @@ class OsaDataset(torch.utils.data.Dataset):
         return x, y
 
     def __getitem_train(self, item):
-        mat_file = spio.loadmat(self.paths[item // len(self.input_labels)], squeeze_me=True)
+        mat_file = self.mat_files[item // len(self.input_labels)]
         input_label = self.input_labels[item % len(self.input_labels)]
         x = read_norm_sqz_from_mat_file(mat_file, input_label)
         y = read_norm_sqz_from_mat_file(mat_file, self.output_label)
