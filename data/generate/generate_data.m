@@ -5,7 +5,7 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
     end
     if dim == 2
         if strcmp(type, 'train')
-            cfg_lambda = @() (random_2d_cfg(img_dims, randi(shape_range), gpu_ids));
+            cfg_lambda = @() (random_train_2d_cfg(img_dims, randi(shape_range), gpu_ids));
         elseif strcmp(type, 'benchmark absorb')
             cfg_lambda = @() (get_2d_cube_benchmark_cfg('absorb', gpu_ids, img_dims));
         elseif strcmp(type, 'benchmark homo')
@@ -23,7 +23,7 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
         end
     elseif dim == 3
         if strcmp(type, 'train')
-            cfg_lambda = @() (random_3d_cfg(img_dims, randi(shape_range), gpu_ids));
+            cfg_lambda = @() (random_train_3d_cfg(img_dims, randi(shape_range), gpu_ids));
         elseif strcmp(type, 'benchmark absorb')
             cfg_lambda = @() (get_3d_cube_benchmark_cfg('absorb', gpu_ids, img_dims));
         elseif strcmp(type, 'benchmark homo')

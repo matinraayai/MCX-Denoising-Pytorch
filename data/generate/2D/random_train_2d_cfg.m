@@ -1,4 +1,4 @@
-function cfg = random_2d_cfg(imsize, num_props, gpu_ids)
+function cfg = random_train_2d_cfg(imsize, num_props, gpu_ids)
     addpath('./volume')
     % Generates random configuration for running a 2D simulation in the MCX software.
     [vol, maxprop] = random_2d_volume(imsize, num_props);
