@@ -21,9 +21,6 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.architecture = 'DnCNN'
 
-    # Whether to use ACSConvertor to convert a 2D convolution-based model to 3D for transfer learning
-    cfg.model.use_ACSConvertor = False
-
     # DnCNN-specific arguments:
     cfg.model.DnCNN = CfgNode()
 
@@ -339,7 +336,7 @@ def read_training_cfg_file(config_file_path):
     cfg.merge_from_file(config_file_path)
     # Logic to switch to 2D/3D loss function for SSIM
     model_architecture = cfg.model.architecture
-    cfg.loss.ssim.dim = 3 if getattr(cfg.model, model_architecture).do_3d or cfg.model.use_ACSConvertor else 2
+    cfg.loss.ssim.dim = 3 if getattr(cfg.model, model_architecture).do_3d else 2
     cfg.freeze()
     return cfg
 

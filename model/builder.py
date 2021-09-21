@@ -7,7 +7,6 @@ import torch.nn as nn
 from .model import CascadedDnCNNWithUNet
 from .model import UNet, DRUNet, DnCNN, ResidualDnCNN
 from .loss import SSIM, PSNR, VGGLoss, WeightedThresholdMSE
-from acsconv.converters import ACSConverter
 
 
 def get_regularizer(reg_opts=()):
@@ -31,8 +30,6 @@ def get_model(**kwargs):
         model = ResidualDnCNN(**kwargs['ResidualDnCNN'])
     elif model_name == 'drunet':
         model = DRUNet(**kwargs['DRUNet'])
-    if kwargs['use_ACSConvertor']:
-        model = ACSConverter(model)
     if kwargs['checkpoint'] is not None:
         state_dict = torch.load(kwargs['checkpoint'])['state_dict']
         state_dict = {key[6:]: value for key, value in state_dict.items()}
