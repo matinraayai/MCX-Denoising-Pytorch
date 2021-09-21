@@ -1,0 +1,22 @@
+dataset:
+  paths:
+    simulation: "data/test/3D/homo/128x128x128/"
+    cascaded: "results/3D/cascaded/homo/128x128x128/"
+    unet: "results/3D/unet/homo/128x128x128/"
+    resmcnet: "results/3D/resmcnet/homo/128x128x128/"
+    dncnn: "results/3D/dncnn/homo/128x128x128/"
+    drunet: "results/3D/drunet/homo/128x128x128/"
+    gpu_anlm: "results/3D/gpu_anlm/homo/128x128x128/"
+    nlm: "results/3D/nlm/homo/128x128x128/"
+    bm4d: "results/3D/bm4d/homo/128x128x128/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+cross_section:
+  x: 64
+  y: 64
+figures:
+  fig_type: "save"
+output_path: "./analysis/homo-128x128x128"
+zero_infs: False
+zero_nans: False
+
