@@ -4,10 +4,8 @@ dataset:
   test_path: 'data/test/2D/absorb/64x64'
 
 model:
-  architecture: 'Cascaded'
+  architecture: 'DnCNN'
   checkpoint:
-  Cascaded:
+  DnCNN:
     do_3d: False
-    num_dncnn_layers: 17
-    unet_activation_fn: 'F.relu'
-output_dir: 'results/2D/cascaded/absorb/64x64/'
+output_dir: 'results/2D/dncnn/absorb/64x64/'

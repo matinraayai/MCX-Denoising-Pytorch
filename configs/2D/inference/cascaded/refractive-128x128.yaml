@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'Cascaded'
-  checkpoint: 'checkpoints/2D/blind-denoising/cascaded-old/version_6/checkpoints/epoch=0332-MSE=0.1637-SSIM=0.8390-PSNR=51.6326.ckpt'
+  checkpoint:
   Cascaded:
     do_3d: False
     num_dncnn_layers: 17
