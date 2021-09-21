@@ -1,0 +1,19 @@
+dataset:
+  paths:
+    simulation: "data/test/2D/refractive/100x100"
+    unet: "results/unet-2D-sep-20-2021/refractive/100x100"
+    resmcnet: "results/resmcnet-sep-20-2021/"
+#    cascaded: 'results/cascaded-new-local-sep-20-2021/'
+#    cascaded-old: 'results/cascaded-old-sep-20-2021/'
+#    cascaded: './results/refractive-2d-100x100-dncnn/'
+#    gpu_anlm: "results/anlm/refractive-64x64x64"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+cross_section:
+  x: 50
+figures:
+  fig_type: "save"
+output_path: "./analysis/2d-blind-mse"
+zero_infs: False
+zero_nans: False
+

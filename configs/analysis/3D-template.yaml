@@ -1,0 +1,17 @@
+# Config file used for analyze-3d.py
+dataset:
+  paths:
+    simulation:
+    experiment_1:
+    experiment_2:
+    experiment_3:
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+cross_section:
+  x:
+  y:
+figures:
+  fig_type: "save"
+  output_path: "."
+zero_infs: False
+zero_nans: False
