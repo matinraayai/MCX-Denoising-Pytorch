@@ -44,6 +44,8 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.UNet.do_3d = False
 
+    cfg.model.UNet.activation_fn = 'nn.Identity()'
+
     # Residual DnCNN-specific arguments:
     cfg.model.ResidualDnCNN = CfgNode()
 
@@ -64,15 +66,23 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.Cascaded.do_3d = False
 
-    cfg.model.Cascaded.num_dncnn = 1
-
     cfg.model.Cascaded.num_dncnn_layers = 17
 
     cfg.model.Cascaded.dncnn_activation_fn = 'F.relu'
 
-    cfg.model.Cascaded.unet_activation_fn = 'nn.Identity()'
+    cfg.model.Cascaded.unet_activation_fn = 'F.relu'
 
     cfg.model.Cascaded.padding_mode = 'reflect'
+
+    cfg.model.Cascaded.unet_checkpoint = None
+
+    cfg.model.Cascaded.dncnn_checkpoint = None
+
+    cfg.model.Cascaded.freeze_unet = False
+
+    cfg.model.Cascaded.freeze_dncnn = False
+
+    cfg.model.Cascaded.init_policy = 'He'
 
     # DRUNet Specific arguments:
     cfg.model.DRUNet = CfgNode()
@@ -160,11 +170,11 @@ def add_dataset_cfg(cfg: CfgNode, num_gpus):
     """
     cfg.dataset = CfgNode()
 
-    cfg.dataset.train_path = 'data/rand2d/train/'
+    cfg.dataset.train_path = 'data/train/3D'
 
-    cfg.dataset.valid_path = 'data/rand2d/validation/'
+    cfg.dataset.valid_path = 'data/validation/3D'
 
-    cfg.dataset.test_path = 'data/rand2d/test/'
+    cfg.dataset.test_path = 'data/test/3D'
 
     cfg.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
 
@@ -205,6 +215,8 @@ def add_solver_cfg(cfg: CfgNode):
     """
     cfg.solver = CfgNode()
 
+    cfg.solver.optimizer = 'SGD'
+
     cfg.solver.batch_size = 32
 
     cfg.solver.total_iterations = 1000
@@ -234,11 +246,11 @@ def add_solver_cfg(cfg: CfgNode):
     cfg.solver.gamma = 0.1
 
     # should be a tuple like (30000,)
-    cfg.solver.steps = (30000, 35000)
+    cfg.solver.steps = (600, 800)
 
     cfg.solver.warmup_factor = 1.0 / 1000
 
-    cfg.solver.warmup_iters = 1000
+    cfg.solver.warmup_iters = 2
 
     cfg.solver.warmup_method = 'linear'
 
@@ -303,6 +315,14 @@ def get_default_analysis_cfg():
     return _C
 
 
+def get_default_profiling_cfg():
+    _C = CfgNode()
+    _C = add_model_cfg(_C)
+    _C.input_dims = (64, 64, 64)
+    _C.num_iterations = 100
+    return _C
+
+
 def save_all_cfg(cfg, output_dir):
     """Save configs in the output directory."""
     # Save config.yaml in the experiment directory after combine all
@@ -328,6 +348,14 @@ def read_analysis_cfg_file(config_file_path):
     cfg = get_default_analysis_cfg()
     cfg.update()
     cfg.set_new_allowed(True)
+    cfg.merge_from_file(config_file_path)
+    cfg.freeze()
+    return cfg
+
+
+def read_profiling_cfg_file(config_file_path):
+    cfg = get_default_profiling_cfg()
+    cfg.update()
     cfg.merge_from_file(config_file_path)
     cfg.freeze()
     return cfg
