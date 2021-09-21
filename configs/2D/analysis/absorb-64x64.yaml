@@ -1,0 +1,21 @@
+dataset:
+  paths:
+    simulation: "data/test/2D/absorb/64x64/"
+    cascaded: "results/2D/cascaded/absorb/64x64/"
+    unet: "results/2D/unet/absorb/64x64/"
+    resmcnet: "results/2D/resmcnet/absorb/64x64/"
+    dncnn: "results/2D/dncnn/absorb/64x64/"
+    drunet: "results/2D/drunet/absorb/64x64/"
+    gpu_anlm: "results/2D/gpu_anlm/absorb/64x64/"
+    nlm: "results/2D/nlm/absorb/64x64/"
+    bm3d: "results/2D/bm4d/absorb/64x64/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+cross_section:
+  x: 50
+figures:
+  fig_type: "save"
+output_path: "./analysis/absorb-64x64"
+zero_infs: False
+zero_nans: False
+
