@@ -4,8 +4,9 @@ from typing import Any, Callable, Dict, Iterable, List, Set, Type, Union
 import torch
 
 from yacs.config import CfgNode
+from .lars import LARS
 
-from torch.optim.lr_scheduler import MultiStepLR, ReduceLROnPlateau
+from torch.optim.lr_scheduler import MultiStepLR, ReduceLROnPlateau, ExponentialLR
 from .lr_scheduler import WarmupCosineLR, WarmupMultiStepLR
 
 # 0. Gradient Clipping
@@ -102,13 +103,6 @@ def build_optimizer(cfg: CfgNode, model: torch.nn.Module) -> torch.optim.Optimiz
         torch.nn.BatchNorm2d,
         torch.nn.BatchNorm3d,
         torch.nn.SyncBatchNorm,
-        # Inherits from connectomics.model
-        # BatchInstanceNorm1d,
-        # BatchInstanceNorm2d,
-        # BatchInstanceNorm3d,
-        # SynchronizedBatchNorm1d,
-        # SynchronizedBatchNorm2d,
-        # SynchronizedBatchNorm3d,
         torch.nn.GroupNorm,
         torch.nn.InstanceNorm1d,
         torch.nn.InstanceNorm2d,
@@ -134,8 +128,15 @@ def build_optimizer(cfg: CfgNode, model: torch.nn.Module) -> torch.optim.Optimiz
                 lr = cfg.solver.base_lr * cfg.solver.bias_lr_factor
                 weight_decay = cfg.solver.weight_decay_bias
             params += [{"params": [value], "lr": lr, "weight_decay": weight_decay}]
-
-    optimizer = torch.optim.SGD(params, cfg.solver.base_lr, momentum=cfg.solver.momentum)
+    if cfg.solver.optimizer.lower() == 'adamw':
+        optimizer = torch.optim.AdamW(params, cfg.solver.base_lr)
+    elif cfg.solver.optimizer.lower() == 'sgd':
+        optimizer = torch.optim.SGD(params, cfg.solver.base_lr, momentum=cfg.solver.momentum)
+    elif cfg.solver.optimizer.lower() == 'lars':
+        optimizer = LARS(params, lr=cfg.solver.base_lr, momentum=cfg.solver.momentum,
+                         max_epoch=cfg.solver.total_iterations)
+    else:
+        raise NotImplementedError(f"Invalid optimizer name {cfg.solver.optimizer}.")
     optimizer = maybe_add_gradient_clipping(cfg, optimizer)
     print('Optimizer: ', optimizer.__class__.__name__)
     return optimizer
@@ -162,7 +163,7 @@ def build_lr_scheduler(
     elif name == "WarmupCosineLR":
         return WarmupCosineLR(
             optimizer,
-            cfg.solver.iteration_total,
+            cfg.solver.total_iterations,
             warmup_factor=cfg.solver.warmup_factor,
             warmup_iters=cfg.solver.warmup_iters,
             warmup_method=cfg.solver.warmup_method,
@@ -176,9 +177,12 @@ def build_lr_scheduler(
     elif name == "ReduceLROnPlateau":
         return ReduceLROnPlateau(
             optimizer,
-            mode='min', factor=cfg.solver.gamma, patience=1000,
+            mode='min', factor=cfg.solver.gamma, patience=50,
             threshold=0.001, threshold_mode='rel', cooldown=0,
             min_lr=1e-06, eps=1e-08
         )
+    elif name == "ExponentialLR":
+        return ExponentialLR(optimizer, cfg.solver.gamma,
+                             cfg.solver.total_iterations)
     else:
         raise ValueError("Unknown LR scheduler: {}".format(name))
