@@ -1,0 +1,11 @@
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  output_label: 'x1e9'
+  test_path: 'data/validation/3D/64x64x64'
+
+model:
+  architecture: 'DRUNet'
+  checkpoint:
+  DRUNet:
+    do_3d: True
+output_dir: 'results/3D/drunet/validation/64x64x64/'
