@@ -39,12 +39,16 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.DnCNN.inter_kernel_channel = 64
 
+    cfg.model.DnCNN.init_policy = None
+
     # UNet-specific arguments:
     cfg.model.UNet = CfgNode()
 
     cfg.model.UNet.do_3d = False
 
-    cfg.model.UNet.activation_fn = 'nn.Identity()'
+    cfg.model.UNet.activation_fn = 'F.relu'
+
+    cfg.model.UNet.init_policy = None
 
     # Residual DnCNN-specific arguments:
     cfg.model.ResidualDnCNN = CfgNode()
@@ -61,6 +65,8 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.ResidualDnCNN.padding_mode = 'reflect'
 
+    cfg.model.ResidualDnCNN.init_policy = None
+
     # Cascaded DnCNN + UNet Specific arguments:
     cfg.model.Cascaded = CfgNode()
 
@@ -74,15 +80,7 @@ def add_model_cfg(cfg: CfgNode):
 
     cfg.model.Cascaded.padding_mode = 'reflect'
 
-    cfg.model.Cascaded.unet_checkpoint = None
-
-    cfg.model.Cascaded.dncnn_checkpoint = None
-
-    cfg.model.Cascaded.freeze_unet = False
-
-    cfg.model.Cascaded.freeze_dncnn = False
-
-    cfg.model.Cascaded.init_policy = 'He'
+    cfg.model.Cascaded.init_policy = None
 
     # DRUNet Specific arguments:
     cfg.model.DRUNet = CfgNode()
@@ -94,6 +92,8 @@ def add_model_cfg(cfg: CfgNode):
     cfg.model.DRUNet.res_block_channels = None
 
     cfg.model.DRUNet.activation_function = 'F.relu'
+
+    cfg.model.DRUNet.init_policy = None
 
     return cfg
 

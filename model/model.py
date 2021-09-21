@@ -1,11 +1,7 @@
-"""
-Contains all the de-noising models used in literature and new ones proposed by us.
-"""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.nn.init as init
-from .layers import ResidualBlock, InterpolateUpSample2D, InterpolateUpSample3D
+from .layers import ResidualBlock
 from .initialization import init_weights
 
 
@@ -83,7 +79,6 @@ class UNet(nn.Module):
             return x - output
         else:
             return output
-
 
 
 class DnCNN(nn.Module):
@@ -169,26 +164,26 @@ class ResidualDnCNN(nn.Module):
 
 
 class CascadedDnCNNWithUNet(nn.Module):
-    def __init__(self, do_3d=False, num_dncnn=1, output_channels=1, num_dncnn_layers=17, dncnn_activation_fn='F.relu',
-                 unet_activation_fn='nn.Identity()',
+    def __init__(self, do_3d=False,
+                 input_channels=1,
+                 output_channels=1, num_dncnn_layers=17, dncnn_activation_fn='F.relu',
+                 unet_activation_fn='F.relu',
                  padding_mode='reflect',
                  init_policy=None):
         super(CascadedDnCNNWithUNet, self).__init__()
-        self.num_dncnn = num_dncnn
-        for num in range(self.num_dncnn):
-            self.__setattr__(f"dncnn{num}", DnCNN(output_channels=output_channels, do_3d=do_3d,
-                                                  num_layers=num_dncnn_layers, activation_fn=dncnn_activation_fn,
-                                                  padding_mode=padding_mode,
-                                                  init_policy=init_policy,
-                                                  standalone=True
-                                                  ))
+        self.dncnn0 = DnCNN(input_channels=input_channels,
+                                output_channels=output_channels, do_3d=do_3d,
+                                num_layers=num_dncnn_layers, activation_fn=dncnn_activation_fn,
+                                padding_mode=padding_mode,
+                                init_policy=init_policy,
+                                kernel_size=3,
+                                padding=1,
+                                standalone=True)
         self.unet = UNet(do_3d=do_3d, init_policy=init_policy, activation_fn=unet_activation_fn,
                          padding_mode=padding_mode)
 
     def forward(self, x):
-        for num in range(self.num_dncnn):
-            x = self.__getattr__(f"dncnn{num}")(x)
-        return self.unet(x)
+        return self.unet(self.dncnn0(x))
 
 
 class DRUNet(nn.Module):

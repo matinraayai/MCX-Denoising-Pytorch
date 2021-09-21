@@ -1,17 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
-class Identity(nn.Module):
-    """
-    The skip connection inside a single a ResidualBlock for ResNet.
-    """
-    def __init__(self, planes):
-        super(Identity, self).__init__()
-        self.planes = planes
-
-    def forward(self, x):
-        return F.pad(x[:, :, ::2, ::2], (0, 0, 0, 0, self.planes//4, self.planes//4), "constant", 0)
-
 
 class ResidualBlock(nn.Module):
     """
@@ -23,7 +12,7 @@ class ResidualBlock(nn.Module):
                  kernel_size=3, stride=1, dilation=1,
                  padding=1,
                  padding_mode='replicate',
-                 option='A',
+                 projection=True,
                  activation_fn=F.relu):
         super(ResidualBlock, self).__init__()
         conv_layer = nn.Conv3d if do_3d else nn.Conv2d
@@ -42,13 +31,11 @@ class ResidualBlock(nn.Module):
         self.bn2 = norm_layer(out_channels)
         self.shortcut = nn.Sequential()
         if stride != 1 or in_channels != out_channels:
-            if option == 'A':
-                self.shortcut = Identity(out_channels)
-            elif option == 'B':
-                self.shortcut = nn.Sequential(
-                    conv_layer(in_channels, self.expansion * out_channels, kernel_size=1, stride=stride, bias=False),
-                    norm_layer(self.expansion * out_channels)
-                )
+            if projection:
+                self.shortcut = nn.Sequential(conv_layer(in_channels, out_channels, kernel_size=1, padding=0),
+                                              norm_layer(out_channels))
+            else:
+                self.shortcut = lambda x: x
         self.activation_fn = activation_fn
 
     def forward(self, x):

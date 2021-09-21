@@ -1,5 +1,5 @@
 """
-YACS configs for training and inference
+Builder functions for models and loss functions
 Borrowed from https://github.com/zudi-lin/pytorch_connectomics/
 """
 import torch
@@ -7,6 +7,7 @@ import torch.nn as nn
 from .model import CascadedDnCNNWithUNet
 from .model import UNet, DRUNet, DnCNN, ResidualDnCNN
 from .loss import SSIM, PSNR, VGGLoss, WeightedThresholdMSE
+from acsconv.converters import ACSConverter
 
 
 def get_regularizer(reg_opts=()):
@@ -19,22 +20,31 @@ def get_regularizer(reg_opts=()):
 
 def get_model(**kwargs):
     model_name = kwargs['architecture'].lower()
+    model = None
     if model_name == 'unet':
-        return UNet(**kwargs['UNet'])
+        model = UNet(**kwargs['UNet'])
     elif model_name == 'dncnn':
-        return DnCNN(**kwargs['DnCNN'])
+        model = DnCNN(**kwargs['DnCNN'])
     elif model_name == 'cascaded':
-        return CascadedDnCNNWithUNet(**kwargs['Cascaded'])
+        model = CascadedDnCNNWithUNet(**kwargs['Cascaded'])
     elif model_name == 'residualdncnn':
-        return ResidualDnCNN(**kwargs['ResidualDnCNN'])
+        model = ResidualDnCNN(**kwargs['ResidualDnCNN'])
     elif model_name == 'drunet':
-        return DRUNet(**kwargs['DRUNet'])
+        model = DRUNet(**kwargs['DRUNet'])
+    if kwargs['use_ACSConvertor']:
+        model = ACSConverter(model)
+    if kwargs['checkpoint'] is not None:
+        state_dict = torch.load(kwargs['checkpoint'])['state_dict']
+        state_dict = {key[6:]: value for key, value in state_dict.items()}
+        model.load_state_dict(state_dict)
+    return model
 
 
-def load_model_from_checkpoint(checkpoint_dir, **kwargs):
+def create_model_from_lightning_checkpoint(checkpoint_dir, **kwargs):
     model = get_model(**kwargs).cuda()
-    state_dict = torch.load(checkpoint_dir)
-    model.load_state_dict(state_dict.state_dict())
+    state_dict = torch.load(checkpoint_dir)['state_dict']
+    state_dict = {key[6:]: value for key, value in state_dict.items()}
+    model.load_state_dict(state_dict)
     return model
 
 
