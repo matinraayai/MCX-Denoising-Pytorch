@@ -100,18 +100,21 @@ def get_pretty_photon_level(input_label):
     return f'${input_label[1]}0^{input_label[-1]}$'
 
 
-def normalize_fluence_map(f_map):
-    f_map = f_map.astype(np.double)
-    return np.log1p(f_map).squeeze()
+def normalize_fluence_map_and_crop(f_map):
+    f_map = np.log1p(f_map.astype(np.double)).squeeze()
+    if len(f_map.shape) == 3:
+        f_map = f_map[f_map.shape[0] // 2]
+    return f_map
 
 
 def plot(datasets, input_labels, output_label, plot_output_dir, dataset_name_on_rows=False, size=60, fig_size=(30, 30)):
     """
     model -> dataset name -> label -> sample
     """
-    num_datasets = len(datasets)
+    num_datasets = len(datasets) + 1
     num_samples = len(datasets['simulation'])
     os.makedirs(plot_output_dir, exist_ok=True)
+    print(datasets['simulation']['Refractive Square'].keys())
     for label in input_labels:
         print(f"Generating viz for {label}")
         fig, axs = plt.subplots(num_samples, num_datasets, figsize=fig_size, subplot_kw={'xticks': [], 'yticks': []},
@@ -128,17 +131,19 @@ def plot(datasets, input_labels, output_label, plot_output_dir, dataset_name_on_
                 axs[j, 0].set_ylabel(dataset_name, {'family': 'serif', 'color': 'black', 'size': size})
             input_sample = datasets['simulation'][dataset_name][label]
             gt_sample = datasets['simulation'][dataset_name][output_label]
-            input_norm_sample, gt_norm_sample = normalize_fluence_map(input_sample), normalize_fluence_map(gt_sample)
-            axs[j, 0].imshow(input_norm_sample), axs[j, -1]
+            input_norm_sample, gt_norm_sample = normalize_fluence_map_and_crop(input_sample), normalize_fluence_map_and_crop(gt_sample)
+            axs[j, 0].imshow(input_norm_sample), axs[j, -1].imshow(gt_norm_sample)
         # Do the rest of the datasets
-        for i, (model_name, dataset) in enumerate(sorted(datasets.items())):
+        i = 1
+        for model_name, dataset in datasets.items():
             if model_name != 'simulation':
                 print(f"Dataset: {model_name}")
-            axs[0, i].set_title(model_name, {'family': 'serif', 'color': 'black', 'size': size})
-            for j, dataset_name in enumerate(dataset.keys()):
-                sample = dataset[dataset_name][label]
-                norm_sample = normalize_fluence_map(sample)
-                axs[j, i].imshow(norm_sample)
+                axs[0, i].set_title(model_name, {'family': 'serif', 'color': 'black', 'size': size})
+                for j, dataset_name in enumerate(sorted(dataset.keys())):
+                    sample = dataset[dataset_name][label]
+                    norm_sample = normalize_fluence_map_and_crop(sample)
+                    axs[j, i].imshow(norm_sample)
+                i += 1
         fig.savefig(os.path.join(plot_output_dir, f"{label}.png"))
         plt.close(fig)
 
