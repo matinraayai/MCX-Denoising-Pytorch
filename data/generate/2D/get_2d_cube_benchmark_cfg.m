@@ -1,7 +1,8 @@
-function cfg = get_2d_benchmark_cfg(type, gpu_ids, img_dims)
+function cfg = get_2d_cube_benchmark_cfg(type, gpu_ids, img_dims)
     vol = uint8(ones(img_dims));
     vol(floor(img_dims * 0.3): floor(img_dims * 0.7), floor(img_dims * 0.1): floor(img_dims * 0.5)) = 2;
-    cfg.vol = vol;
+    % Add a third axis to the volume. MCX doesn't accept 2D volumes directly.
+    cfg.vol = permute(uint8(vol), [3, 1, 2]);
 
     cfg.issrcfrom0 = 1;
     cfg.srcpos = [0 floor(img_dims(2) / 2) 0];

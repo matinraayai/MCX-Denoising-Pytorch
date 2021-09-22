@@ -29,22 +29,27 @@ function benchmark_anlm(input_dir, output_dir, v, f1, f2, rician, gpuid, bw)
         input_file_path = strcat(input_dir, '/', current_file_name);
         output_file_path = strcat(output_dir, '/', current_file_name);
         % Each input file will have a simulation for a particular number of photons. We will have to identify and
-        % preserve each labe
+        % preserve each label
         labels = {whos('-file', input_file_path).name};
         % Load all the simulations into the workspace
         input_file = load(input_file_path);
         % Apply the filter on each simulation
         for j = 1 : length(labels)
             current_label = labels{j};
-            fprintf("Applying filter to %s\n", current_label);
-            current_simulation = getfield(input_file, current_label);
-            current_output = mcxfilter(current_simulation, v, f1, f2, rician, gpuid, bw);
-            eval(sprintf("%s = current_output;", current_label));
-            % Save the results to the output directory
-            if j == 1
-                save(output_file_path, '-mat-binary', current_label);
+            if strcmp(current_label, 'cfg')
+                cfg = getfield(input_file, 'cfg');
+                save(output_file_path, 'cfg');
             else
-                save(output_file_path, current_label, '-append', '-mat-binary');
+                fprintf("Applying filter to %s\n", current_label);
+                current_simulation = getfield(input_file, current_label);
+                current_output = mcxfilter(current_simulation, v, f1, f2, rician, gpuid, bw);
+                eval(sprintf("%s = current_output;", current_label));
+                % Save the results to the output directory
+                if j == 1
+                    save(output_file_path, current_label);
+                else
+                    save(output_file_path, current_label, '-append');
+                end
             end
         end
     end
