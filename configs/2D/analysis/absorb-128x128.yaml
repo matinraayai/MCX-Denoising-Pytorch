@@ -6,13 +6,12 @@ dataset:
     resmcnet: "results/2D/resmcnet/absorb/128x128/"
     dncnn: "results/2D/dncnn/absorb/128x128/"
     drunet: "results/2D/drunet/absorb/128x128/"
-    gpu_anlm: "results/2D/gpu_anlm/absorb/128x128/"
     nlm: "results/2D/nlm/absorb/128x128/"
     bm3d: "results/2D/bm4d/absorb/128x128/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
 cross_section:
-  x: 50
+  x: 64
 figures:
   fig_type: "save"
 output_path: "./analysis/absorb-128x128"
