@@ -320,6 +320,19 @@ def get_default_profiling_cfg():
     return _C
 
 
+def get_default_vis_cfg():
+    _C = CfgNode()
+    # Dataset
+    _C.dataset = CfgNode()
+    _C.dataset.paths = CfgNode()
+    _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+    _C.dataset.output_label = 'x1e9'
+    _C.output_dir = "."
+    _C.dataset_name_on_rows = True
+    _C.size = 60
+    return _C
+
+
 def save_all_cfg(cfg, output_dir):
     """Save configs in the output directory."""
     # Save config.yaml in the experiment directory after combine all
@@ -353,6 +366,15 @@ def read_analysis_cfg_file(config_file_path):
 def read_profiling_cfg_file(config_file_path):
     cfg = get_default_profiling_cfg()
     cfg.update()
+    cfg.merge_from_file(config_file_path)
+    cfg.freeze()
+    return cfg
+
+
+def read_vis_cfg_file(config_file_path):
+    cfg = get_default_vis_cfg()
+    cfg.update()
+    cfg.set_new_allowed(True)
     cfg.merge_from_file(config_file_path)
     cfg.freeze()
     return cfg
