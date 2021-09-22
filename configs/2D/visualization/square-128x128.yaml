@@ -1,0 +1,42 @@
+dataset:
+  paths:
+    simulation:
+      'Absorbing Square': "data/test/2D/absorb/128x128/"
+      'Refractive Square': "data/test/2D/refractive/128x128/"
+      'Homogenous': "data/test/2D/homo/128x128/"
+    NLM:
+      'Absorbing Square': "results/2D/nlm/absorb/128x128/"
+      'Refractive Square': "results/2D/nlm/refractive/128x128/"
+      'Homogenous': "results/2D/nlm/homo/128x128/"
+    BM3D:
+      'Absorbing Square': "results/2D/bm4d/absorb/128x128/"
+      'Refractive Square': "results/2D/bm4d/refractive/128x128/"
+      'Homogenous': "results/2D/bm4d/homo/128x128/"
+    DnCNN:
+      'Absorbing Square': "results/2D/dncnn/absorb/128x128/"
+      'Refractive Square': "results/2D/dncnn/refractive/128x128/"
+      'Homogenous': "results/2D/dncnn/homo/128x128/"
+    ResMCNet:
+      'Absorbing Square': "results/2D/resmcnet/absorb/128x128/"
+      'Refractive Square': "results/2D/resmcnet/refractive/128x128/"
+      'Homogenous': "results/2D/resmcnet/homo/128x128/"
+    Cascaded:
+      'Absorbing Square': "results/2D/cascaded/absorb/128x128/"
+      'Refractive Square': "results/2D/cascaded/refractive/128x128/"
+      'Homogenous': "results/2D/cascaded/homo/128x128/"
+    UNet:
+      'Absorbing Square': "results/2D/unet/absorb/128x128/"
+      'Refractive Square': "results/2D/unet/refractive/128x128/"
+      'Homogenous': "results/2D/unet/homo/128x128/"
+    DRUNet:
+      'Absorbing Square': "results/2D/drunet/absorb/128x128/"
+      'Refractive Square': "results/2D/drunet/refractive/128x128/"
+      'Homogenous': "results/2D/drunet/homo/128x128/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+dataset_name_on_rows: True
+output_path: "./visualization/square-128x128"
+font_size: 40
+fig_size: (30, 30)
+
