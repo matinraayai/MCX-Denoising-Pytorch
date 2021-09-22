@@ -34,8 +34,10 @@ def all_labels_in_mat(path, only_mats=True):
     return set([i[0] for i in info if i[2] == 'single' or i[2] == 'double'])
 
 
-def read_mat_files(directory, mapping='label to filename'):
+def read_mat_files(directory, mapping='label to filename', max_num_files=-1):
     path_list = make_path_list(directory)
+    if max_num_files != -1:
+        path_list = path_list[:max_num_files]
     output = {}
     iterator = tqdm.tqdm(enumerate(path_list))
     for i, (file_name, path) in iterator:

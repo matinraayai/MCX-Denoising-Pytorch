@@ -329,7 +329,8 @@ def get_default_vis_cfg():
     _C.dataset.output_label = 'x1e9'
     _C.output_dir = "."
     _C.dataset_name_on_rows = True
-    _C.size = 60
+    _C.font_size = 60
+    _C.fig_size = (30, 30)
     return _C
 
 
