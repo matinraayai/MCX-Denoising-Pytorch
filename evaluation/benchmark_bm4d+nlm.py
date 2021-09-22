@@ -11,7 +11,8 @@ from utils import read_mat_files
 def get_args():
     parser = argparse.ArgumentParser(description="Script for applying NLM and BM4D/3D on test datasets")
     parser.add_argument('--simulation-path', type=str, help='path to test simulation dataset')
-    parser.add_argument('--output-path', type=str, help='path to save the results')
+    parser.add_argument('--output-path', type=str, help='path to save the results. Should have a string placeholder '
+                                                        'for nlm and bm4d')
     return parser.parse_args()
 
 
@@ -24,8 +25,8 @@ def main():
 
     simulation_files_mapping = read_mat_files(args.simulation_path, mapping='filename to label')
 
-    bm4d_output_path = os.path.join(args.output_path, 'bm4d')
-    nlm_output_path = os.path.join(args.output_path, 'nlm')
+    bm4d_output_path = args.output_path.format('bm4d')
+    nlm_output_path = args.output_path.format('nlm')
     os.makedirs(bm4d_output_path, exist_ok=True)
     os.makedirs(nlm_output_path, exist_ok=True)
     iterator = tqdm.tqdm(simulation_files_mapping.keys())
