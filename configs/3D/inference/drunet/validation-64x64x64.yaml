@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'DRUNet'
-  checkpoint:
+  checkpoint: "checkpoints/3D/blind-denoising/drunet/version_1/checkpoints/epoch=1499-MSE=0.0027-SSIM=0.9851-PSNR=63.9906.ckpt"
   DRUNet:
     do_3d: True
 output_dir: 'results/3D/drunet/validation/64x64x64/'

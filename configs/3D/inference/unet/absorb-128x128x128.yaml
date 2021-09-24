@@ -4,8 +4,9 @@ dataset:
   test_path: 'data/test/3D/absorb/128x128x128'
 
 model:
-  architecture: 'ResidualDnCNN'
-  checkpoint:
-  ResidualDnCNN:
+  architecture: 'UNet'
+  checkpoint: "checkpoints/3D/blind-denoising/unet/version_2/checkpoints/epoch=1497-MSE=0.0042-SSIM=0.9745-PSNR=62.5000.ckpt"
+  UNet:
+    activation_fn: 'F.relu'
     do_3d: True
 output_dir: 'results/3D/unet/absorb/128x128x128/'
