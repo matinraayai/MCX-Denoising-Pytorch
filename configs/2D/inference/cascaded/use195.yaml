@@ -1,7 +1,7 @@
 dataset:
   input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
   output_label: 'x1e9'
-  test_path: 'data/validation/2D/64x64'
+  test_path: 'data/test/2D/USE195/'
 
 model:
   architecture: 'Cascaded'
@@ -10,4 +10,4 @@ model:
     do_3d: False
     num_dncnn_layers: 17
     unet_activation_fn: 'F.relu'
-output_dir: 'results/2D/cascaded/validation/64x64/'
+output_dir: 'results/2D/cascaded/use195/'

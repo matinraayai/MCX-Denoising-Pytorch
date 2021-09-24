@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'ResidualDnCNN'
-  checkpoint:
+  checkpoint: "checkpoints/2D/blind-denoising/resmcnet/version_0/checkpoints/epoch=1498-MSE=0.2071-SSIM=0.9113-PSNR=51.3357.ckpt"
   ResidualDnCNN:
     do_3d: False
 output_dir: 'results/2D/resmcnet/homo/128x128/'

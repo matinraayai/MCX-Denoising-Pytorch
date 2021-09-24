@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'UNet'
-  checkpoint:
+  checkpoint: "checkpoints/2D/blind-denoising/unet/version_0/checkpoints/epoch=1499-MSE=0.1426-SSIM=0.8984-PSNR=51.5891.ckpt"
   UNet:
     activation_fn: 'F.relu'
     do_3d: False

@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'DRUNet'
-  checkpoint:
+  checkpoint: "checkpoints/2D/blind-denoising/drunet/version_0/checkpoints/epoch=1499-MSE=0.1888-SSIM=0.9267-PSNR=52.4070.ckpt"
   DRUNet:
     do_3d: False
     num_res_blocks: 4

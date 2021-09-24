@@ -5,7 +5,7 @@ dataset:
 
 model:
   architecture: 'DnCNN'
-  checkpoint:
+  checkpoint: "checkpoints/2D/blind-denoising/dncnn/version_0/checkpoints/epoch=1491-MSE=0.1963-SSIM=0.9113-PSNR=50.9365.ckpt"
   DnCNN:
     do_3d: False
 output_dir: 'results/2D/dncnn/homo/128x128/'
