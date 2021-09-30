@@ -182,6 +182,8 @@ def add_dataset_cfg(cfg: CfgNode, num_gpus):
     cfg.dataset.dataloader_workers = cpu_count() // num_gpus
 
     cfg.dataset.crop_size = None
+
+    cfg.dataset.padding = None
     return cfg
 
 
@@ -300,7 +302,7 @@ def get_default_analysis_cfg():
     # Cross section coordinates
     _C.cross_section = CfgNode()
     _C.cross_section.x = 50
-    _C.cross_section.y = 50
+    _C.cross_section.y = None
     # Figure options
     _C.figures = CfgNode()
     _C.figures.fig_type = "display only"

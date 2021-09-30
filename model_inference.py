@@ -38,7 +38,7 @@ def main():
     model = create_model_from_lightning_checkpoint(cfg.model.checkpoint, **cfg.model)
 
     test_dataset = OsaDataset(cfg.dataset.test_path, cfg.dataset.input_labels, cfg.dataset.output_label,
-                              False)
+                              False, padding=cfg.dataset.padding)
     test_dataloader = DataLoader(test_dataset, 1, shuffle=False, num_workers=cfg.dataset.dataloader_workers,
                                  pin_memory=True)
 
@@ -63,7 +63,7 @@ def main():
                                            "mean": prediction.mean()})
                 predictions[label].append(prediction)
 
-        scio.savemat(cfg.output_dir + f'{i}.mat', predictions)
+        scio.savemat(os.path.join(cfg.output_dir, f'{i}.mat'), predictions)
 
 
 if __name__ == '__main__':

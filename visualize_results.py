@@ -107,14 +107,13 @@ def normalize_fluence_map_and_crop(f_map):
     return f_map
 
 
-def plot(datasets, input_labels, output_label, plot_output_dir, dataset_name_on_rows=False, size=60, fig_size=(30, 30)):
+def plot(datasets, input_labels, output_label, plot_output_dir, dataset_name_on_rows=False, size=60, fig_size=(50, 50)):
     """
     model -> dataset name -> label -> sample
     """
     num_datasets = len(datasets) + 1
     num_samples = len(datasets['simulation'])
     os.makedirs(plot_output_dir, exist_ok=True)
-    print(datasets['simulation']['Refractive Square'].keys())
     for label in input_labels:
         print(f"Generating viz for {label}")
         fig, axs = plt.subplots(num_samples, num_datasets, figsize=fig_size, subplot_kw={'xticks': [], 'yticks': []},

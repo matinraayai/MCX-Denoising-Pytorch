@@ -100,13 +100,13 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
         :return: None
         """
         plot_label = f"$10^{int(label[-1])}$"
-        linestyles = ['solid', 'dotted', 'dashed', 'dashdot', 'loosely dotted', 'loosely dashed', 'densely dashed']
+        linestyles = ['solid', 'dotted', 'dashed', 'dashdot', ':']
         for i, (data_name, data) in enumerate(stat_dicts.items()):
             if label in data:
                 if label != 'x1e9':
                     x_values = np.arange(0, len(data[label][stat_name]))
                     y_values = data[label][stat_name]
-                    plt.plot(x_values, y_values, color=color, label=f"{plot_label}_{data_name}", linestyle=linestyles[i])
+                    plt.plot(x_values, y_values, color=color, label=f"{plot_label}_{data_name}", linestyle=linestyles[i % 5])
 
     def create_stat_plot(stat_name, x_axis_label, y_axis_label, legend=False):
         """
@@ -129,22 +129,22 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
         if "display" in fig_type:
             plt.show()
         if "save" in fig_type:
+            os.makedirs(output_path, exist_ok=True)
             plt.savefig(os.path.join(output_path, f'{stat_name}.png'))
         plt.close()
 
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('snr', f'Y over Cross Section at $X = {x_cross_section} mm$, $Y = {y_cross_section} mm$ (mm)',
-                     'SNR (DBs)', True)
+    legend = f'Z over Cross Section at $X = {x_cross_section} mm$, $Y = {y_cross_section} mm$ (mm)' \
+        if y_cross_section else f'Y over Cross Section at $X = {x_cross_section} mm$'
+    create_stat_plot('snr', legend, 'SNR (DBs)', True)
 
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('means', f'Y over Cross Section at $X = {x_cross_section} mm$, $Y = {y_cross_section} mm$ (mm)',
-                     '$log_{10}$(mean) $W/mm^2$', True)
+    create_stat_plot('means', legend, '$log_{10}$(mean) $W/mm^2$', True)
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('stds', f'Y over Cross Section at $X = {x_cross_section} mm$, $Y = {y_cross_section} mm$ (mm)',
-                     '$log_{10}$(STD) Δ$W/mm^2$', True)
+    create_stat_plot('stds', legend, '$log_{10}$(STD) Δ$W/mm^2$', True)
 
 
 def calculate_mean_snr_improvements(original_snr_array, target_snr_array):
