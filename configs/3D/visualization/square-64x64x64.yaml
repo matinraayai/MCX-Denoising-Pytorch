@@ -1,0 +1,42 @@
+dataset:
+  paths:
+    simulation:
+      'Absorbing Square': "data/test/3D/absorb/64x64x64/"
+      'Refractive Square': "data/test/3D/refractive/64x64x64/"
+      'Homogenous': "data/test/3D/homo/64x64x64/"
+    BM4D:
+      'Absorbing Square': "results/3D/bm4d/absorb/64x64x64/"
+      'Refractive Square': "results/3D/bm4d/refractive/64x64x64/"
+      'Homogenous': "results/3D/bm4d/homo/64x64x64/"
+    'GPU ANLM':
+      'Absorbing Square': "results/3D/gpu_anlm/absorb/64x64x64/"
+      'Refractive Square': "results/3D/gpu_anlm/refractive/64x64x64/"
+      'Homogenous': "results/3D/gpu_anlm/homo/64x64x64/"
+    DnCNN:
+      'Absorbing Square': "results/3D/dncnn/absorb/64x64x64/"
+      'Refractive Square': "results/3D/dncnn/refractive/64x64x64/"
+      'Homogenous': "results/3D/dncnn/homo/64x64x64/"
+    ResMCNet:
+      'Absorbing Square': "results/3D/resmcnet/absorb/64x64x64/"
+      'Refractive Square': "results/3D/resmcnet/refractive/64x64x64/"
+      'Homogenous': "results/3D/resmcnet/homo/64x64x64/"
+    Cascaded:
+      'Absorbing Square': "results/3D/cascaded/absorb/64x64x64/"
+      'Refractive Square': "results/3D/cascaded/refractive/64x64x64/"
+      'Homogenous': "results/3D/cascaded/homo/64x64x64/"
+    UNet:
+      'Absorbing Square': "results/3D/unet/absorb/64x64x64/"
+      'Refractive Square': "results/3D/unet/refractive/64x64x64/"
+      'Homogenous': "results/3D/unet/homo/64x64x64/"
+    DRUNet:
+      'Absorbing Square': "results/3D/drunet/absorb/64x64x64/"
+      'Refractive Square': "results/3D/drunet/refractive/64x64x64/"
+      'Homogenous': "results/3D/drunet/homo/64x64x64/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+dataset_name_on_rows: True
+output_path: "./visualization/3D/square-64x64x64"
+font_size: 35
+fig_size: (80, 20)
+

@@ -1,0 +1,26 @@
+dataset:
+  paths:
+    simulation: "data/test/3D/USC195/"
+#    NLM: "results/3D/nlm/use195/"
+    BM4D: "results/3D/bm4d/use195/"
+    'GPU ANLM': "results/3D/gpu_anlm/use195/"
+    DnCNN: "results/3D/dncnn/use195/"
+    ResMCNet: "results/3D/resmcnet/use195/"
+    Cascaded: "results/3D/cascaded/use195/"
+    UNet: "results/3D/unet/use195/"
+    DRUNet: "results/3D/drunet/usc195/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+  crop: "(slice(83, 84), slice(0, 180), slice(130, None))"
+  rotate:
+    do: True
+    k: 1
+contour:
+  path: "matlab/volume/fullhead_atlas.mat"
+  name: "USC_atlas"
+dataset_name_on_rows: True
+output_dir: "./visualization/3D/usc-195/"
+font_size: 40
+fig_size: (100, 40)
+
