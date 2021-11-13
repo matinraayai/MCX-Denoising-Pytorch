@@ -49,7 +49,7 @@ def plot_and_add_colorbar(ax, img, cmap, font, contour):
     y = np.linspace(0, img.shape[0], img.shape[0])
     x, y = np.meshgrid(x, y)
     ax.contour(x, y, contour, colors='black')
-    return ax.imshow(img, cmap=cmap)
+    return ax.imshow(img, cmap=cmap, vmin=0)
 
 
 def plot(datasets, contour, input_labels, output_label, crop, rotate, k_rotate, plot_output_dir,
@@ -72,7 +72,7 @@ def plot(datasets, contour, input_labels, output_label, crop, rotate, k_rotate, 
     axs[0, 0].set_title('Input Simulation', font)
     # Place output label's column last
     gt_column_label = get_pretty_photon_level(output_label)
-    axs[0, -1].set_title(gt_column_label, font)
+    axs[0, -1].set_title(f"{gt_column_label} (Ground Truth)", font)
     # Do this for the rest of the models
     j = 1
     for model_name in datasets.keys():

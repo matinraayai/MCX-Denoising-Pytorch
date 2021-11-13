@@ -4,8 +4,6 @@ import argparse
 import os
 from evaluation.utils import read_mat_files, prepare_label_to_idx_mapping_for_analysis
 from config import read_vis_cfg_file
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib
 
 
 def get_args():
@@ -47,10 +45,10 @@ def plot(datasets, input_labels, output_label, plot_output_dir, dataset_name_on_
         # Place input label's column first
         print(f"Input Labels and Ground Truth")
         input_column_label = get_pretty_photon_level(label)
-        axs[0, 0].set_title(input_column_label, font)
+        axs[0, 0].set_title(f"Input Simulation ({input_column_label})", font)
         # Place output label's column last
         gt_column_label = get_pretty_photon_level(output_label)
-        axs[0, -1].set_title(gt_column_label, font)
+        axs[0, -1].set_title(f"{gt_column_label} (Ground Truth)", font)
         for j, dataset_name in enumerate(sorted(datasets['simulation'].keys())):
             if dataset_name_on_rows:
                 axs[j, 0].set_ylabel(dataset_name, font)
