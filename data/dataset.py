@@ -31,15 +31,20 @@ def crop_volume(vol, crop_pos, crop_size):
     return vol[crop_slice]
 
 
-def pad_volume_to_nearest_4(vol):
+def pad_volume_to_nearest_nth(vol, n):
     """
-    Pads the input volume (both 2D and 3D) so that each dimension is a multiple of 4, to ensure that it can be
+    Pads the input volume (both 2D and 3D) so that each dimension is a multiple of n, to ensure that it can be
     fed into all CNN models
     :param vol:
+    :param n:
     :return: Padded volume
     """
+    if n == 0 or n is None:
+        return vol
     vol_shape = vol.shape[1:]
-    vol_padding = (4 - (s % 4) for s in vol_shape)
+    vol_padding = [n - (s % n) if (s % n) else 0 for s in vol_shape]
+    # Important part
+    vol_padding.reverse()
     padding_input = ()
     for p in vol_padding:
         padding_input += (0, p)
@@ -52,7 +57,8 @@ class OsaDataset(torch.utils.data.Dataset):
                  output_label: str,
                  is_train: bool,
                  crop_size: tuple = None,
-                 augmentor: Compose = None):
+                 augmentor: Compose = None,
+                 padding: int = 4):
         super(OsaDataset, self).__init__()
         self.paths = make_path_list(path)
         self.input_labels = input_labels
@@ -63,6 +69,7 @@ class OsaDataset(torch.utils.data.Dataset):
         self.mat_files = [spio.loadmat(path, squeeze_me=True) for path in self.paths]
         sample_output_tensor_shape = read_norm_sqz_from_mat_file(self.mat_files[0], self.output_label).shape
         self.unpaded_volume_slice = (slice(1),) + tuple(slice(0, s) for s in sample_output_tensor_shape)
+        self.padding = padding
 
     def __getitem_test(self, item):
         mat_file = self.mat_files[item]
@@ -75,8 +82,8 @@ class OsaDataset(torch.utils.data.Dataset):
                 x[input_label] = crop_volume(x[input_label], crop_pos, self.crop_size)
             y = crop_volume(y, crop_pos, self.crop_size)
         for input_label in self.input_labels:
-            x[input_label] = pad_volume_to_nearest_4(x[input_label])
-        y = pad_volume_to_nearest_4(y)
+            x[input_label] = pad_volume_to_nearest_nth(x[input_label], self.padding)
+        y = pad_volume_to_nearest_nth(y, self.padding)
         return x, y
 
     def __getitem_train(self, item):
