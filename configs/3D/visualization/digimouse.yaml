@@ -1,7 +1,6 @@
 dataset:
   paths:
     simulation: "data/test/3D/digimouse/"
-#    NLM: "results/3D/nlm/digimouse/"
     BM4D: "results/3D/bm4d/digimouse/"
     "GPU ANLM": "results/3D/gpu_anlm/digimouse"
     DnCNN: "results/3D/dncnn/digimouse/"
@@ -21,6 +20,6 @@ contour:
   name: "digimouse"
 dataset_name_on_rows: True
 output_dir: "./visualization/3D/digimouse/"
-font_size: 40
+font_size: 50
 fig_size: (100, 15)
 

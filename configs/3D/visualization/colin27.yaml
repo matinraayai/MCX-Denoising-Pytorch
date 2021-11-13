@@ -1,7 +1,6 @@
 dataset:
   paths:
     simulation: "data/test/3D/colin27/"
-#    NLM: "results/3D/nlm/colin27/"
     BM4D: "results/3D/bm4d/colin27/"
     "GPU ANLM": "results/3D/gpu_anlm/colin27"
     DnCNN: "results/3D/dncnn/colin27/"
@@ -21,6 +20,6 @@ contour:
   name: "colin27"
 dataset_name_on_rows: True
 output_dir: "./visualization/3D/colin27/"
-font_size: 40
+font_size: 50
 fig_size: (100, 40)
 
