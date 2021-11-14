@@ -66,7 +66,7 @@ def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 5
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
-def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, output_path):
+def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, output_label, fig_type, output_path):
     """
     Le very complicated plotting function. Basically a wrapper around all the plotting needs this script tries to
     address, which is plotting every cross section statistics for every dataset and every label.
@@ -103,10 +103,10 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
         linestyles = ['solid', 'dotted', 'dashed', 'dashdot', ':']
         for i, (data_name, data) in enumerate(stat_dicts.items()):
             if label in data:
-                if label != 'x1e9':
+                if label != output_label:
                     x_values = np.arange(0, len(data[label][stat_name]))
                     y_values = data[label][stat_name]
-                    plt.plot(x_values, y_values, color=color, label=f"{plot_label}_{data_name}", linestyle=linestyles[i % 5])
+                    plt.plot(x_values, y_values, color=color, label=f"{plot_label} {data_name}", linestyle=linestyles[i % 5])
 
     def create_stat_plot(stat_name, x_axis_label, y_axis_label, legend=False):
         """
@@ -126,11 +126,14 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
         plt.xlabel(x_axis_label)
         plt.ylabel(y_axis_label)
         """These arguments are supplied by the outer function scope."""
+        plt.grid(True, linestyle='--', linewidth=0.04, which='minor')
+        plt.grid(True, linestyle='-', linewidth=1.2, which='major')
+        plt.minorticks_on()
         if "display" in fig_type:
             plt.show()
         if "save" in fig_type:
             os.makedirs(output_path, exist_ok=True)
-            plt.savefig(os.path.join(output_path, f'{stat_name}.png'))
+            plt.savefig(os.path.join(output_path, f'{stat_name}.pdf'))
         plt.close()
 
     fig = plt.figure(figsize=(10, 6))
@@ -147,28 +150,34 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, fig_type, o
     create_stat_plot('stds', legend, '$log_{10}$(STD) Δ$W/mm^2$', True)
 
 
-def calculate_mean_snr_improvements(original_snr_array, target_snr_array):
+def calculate_mean_snr_improvements(original_snr_array, target_snr_array, zero_nans, zero_infs):
     diff = target_snr_array - original_snr_array
+    if zero_nans:
+        diff = diff[diff == diff]
+    if zero_infs:
+        diff = diff[diff != float('inf')]
+        diff = diff[diff != float('-inf')]
     diff_nonzero = diff[0.5 < diff]
     snr_improvement = diff.mean()
     snr_improvement_non_zero = diff_nonzero.mean()
     return snr_improvement, snr_improvement_non_zero
 
 
-def print_snr_improvements(datasets_stats, labels):
+def print_snr_improvements(datasets_stats, labels, zero_nans, zero_infs):
     print("SNR improvements")
     for label in labels:
         for data in datasets_stats:
-            if data != "simulation":
+            if data != "Simulation":
                 print(f"{label}: ")
                 if label in datasets_stats[data]:
-                    snr, non_zero_snr = calculate_mean_snr_improvements(datasets_stats["simulation"][label]["snr"],
-                                                                        datasets_stats[data][label]["snr"])
+                    snr, non_zero_snr = calculate_mean_snr_improvements(datasets_stats["Simulation"][label]["snr"],
+                                                                        datasets_stats[data][label]["snr"],
+                                                                        zero_nans, zero_infs)
                     print(f"{data} SNR: {snr}, non-zero SNR improvement: {non_zero_snr} ")
 
 
 def loss_analysis(datasets, input_labels, output_label):
-    input_dim = 3 if len(datasets["simulation"][output_label].shape) == 4 else 2
+    input_dim = 3 if len(datasets["Simulation"][output_label].shape) == 4 else 2
     loss_types = {'MSE': MSELoss(), 'SSIM': SSIM(dim=input_dim).cuda(), 'PSNR': PSNR()}
 
     loss_stats = {label: {data: {loss_type: 0 for loss_type in loss_types.keys()}
@@ -177,8 +186,8 @@ def loss_analysis(datasets, input_labels, output_label):
 
     for label in input_labels:
         for data in datasets:
-            if data != "simulation":
-                targets = torch.from_numpy(datasets["simulation"][output_label].squeeze()).cuda()
+            if data != "Simulation":
+                targets = torch.from_numpy(datasets["Simulation"][output_label].squeeze()).cuda()
                 preds = torch.from_numpy(datasets[data][label].squeeze()).cuda()
                 for j in range(len(targets)):
                     t = torch.log1p(targets[j].unsqueeze(0).unsqueeze(0).float())
@@ -231,10 +240,11 @@ def main():
     print("Done calculating. Plotting statistics...")
     plot_stats(datasets_stats, cfg.cross_section.x, cfg.cross_section.y,
                cfg.dataset.input_labels + [cfg.dataset.output_label],
+               cfg.dataset.output_label,
                cfg.figures.fig_type, cfg.output_path)
     print("Done plotting.")
 
-    print_snr_improvements(datasets_stats, cfg.dataset.input_labels)
+    print_snr_improvements(datasets_stats, cfg.dataset.input_labels, cfg.zero_nans, cfg.zero_infs)
 
     # Loss Analysis
     loss_stats = loss_analysis(datasets, cfg.dataset.input_labels, cfg.dataset.output_label)
