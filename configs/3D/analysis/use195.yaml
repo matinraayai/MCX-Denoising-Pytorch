@@ -1,19 +1,19 @@
 dataset:
   paths:
-    simulation: "data/test/3D/absorb/use195/"
-    cascaded: "results/3D/cascaded/absorb/use195/"
-    unet: "results/3D/unet/absorb/use195/"
-    resmcnet: "results/3D/resmcnet/absorb/use195/"
-    dncnn: "results/3D/dncnn/absorb/use195/"
-    drunet: "results/3D/drunet/absorb/use195/"
-    gpu_anlm: "results/3D/gpu_anlm/absorb/use195/"
-    nlm: "results/3D/nlm/absorb/use195/"
-    bm4d: "results/3D/bm4d/absorb/use195/"
+    simulation: "data/test/3D/USC195/"
+    cascaded: "results/3D/cascaded/use195/"
+    unet: "results/3D/unet/use195/"
+    resmcnet: "results/3D/resmcnet/use195/"
+    dncnn: "results/3D/dncnn/use195/"
+    drunet: "results/3D/drunet/usc195/"
+    gpu_anlm: "results/3D/gpu_anlm/use195/"
+#    nlm: "results/3D/nlm/use195/"
+    bm4d: "results/3D/bm4d/use195/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
 figures:
   fig_type: "save"
-output_path: "./analysis/absorb-use195"
+output_path: "./analysis/3D/use195"
 zero_infs: False
 zero_nans: False
 

@@ -7,6 +7,7 @@ from model.loss import SSIM, PSNR
 from torch.nn import MSELoss
 import torch
 from config import read_analysis_cfg_file
+import pandas as pd
 
 
 def get_args():
@@ -66,21 +67,25 @@ def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 5
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
-def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, output_label, fig_type, output_path):
+def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labels, output_label, 
+               fig_type, output_path):
     """
     Le very complicated plotting function. Basically a wrapper around all the plotting needs this script tries to
     address, which is plotting every cross section statistics for every dataset and every label.
     As it is a very broad method it uses smaller helper functions defined in its body to do the job, each documented
     on its own.
+
     :param stat_dicts: A dictionary with all the previously calculated statistics using compute_cross_section_stats.
     It should have the following format:
     stat_name (e.g. snr) -> dataset_name (e.g. simulation) -> label (e.g. 'x1e5') -> fluence map
     (e.g. np.ndarray(100, 100, 100))
     Plot sizes are fixed and adjusted manually in the function.
+    :param plot_datasets: the datasets in the stat_dicts to plot.
     :param x_cross_section: X-axis cross section (used for axis labeling)
     :param y_cross_section: Y-axis cross section (used for axis labeling)
     :param labels: All the labels present in the dataset, including input labels and the output label. It is used for
     convenience, since all the labels can be extracted from the stat_dicts
+    :param output_label: the output label
     :param fig_type: Type of the figure, either "save" as an image to the file system or "display" or both.
     :param output_path: In case of "save" fig_type, path to save the figures to. Each figure will be saved in the path
     with the name of the stat e.g. "snr.png".
@@ -100,13 +105,15 @@ def plot_stats(stat_dicts, x_cross_section, y_cross_section, labels, output_labe
         :return: None
         """
         plot_label = f"$10^{int(label[-1])}$"
-        linestyles = ['solid', 'dotted', 'dashed', 'dashdot', ':']
-        for i, (data_name, data) in enumerate(stat_dicts.items()):
-            if label in data:
-                if label != output_label:
-                    x_values = np.arange(0, len(data[label][stat_name]))
-                    y_values = data[label][stat_name]
-                    plt.plot(x_values, y_values, color=color, label=f"{plot_label} {data_name}", linestyle=linestyles[i % 5])
+        linestyles = ['solid', 'dotted', 'dashed', 'dashdot']
+        i = 0
+        for (data_name, data) in stat_dicts.items():
+            if label in data and data_name in plot_datasets:
+                x_values = np.arange(0, len(data[label][stat_name]))
+                y_values = data[label][stat_name]
+                plt.plot(x_values, y_values, color=color, label=f"{plot_label} {data_name}",
+                         linestyle=linestyles[i % len(linestyles)])
+                i += 1
 
     def create_stat_plot(stat_name, x_axis_label, y_axis_label, legend=False):
         """
@@ -163,17 +170,21 @@ def calculate_mean_snr_improvements(original_snr_array, target_snr_array, zero_n
     return snr_improvement, snr_improvement_non_zero
 
 
-def print_snr_improvements(datasets_stats, labels, zero_nans, zero_infs):
-    print("SNR improvements")
+def save_snr_improvements(datasets_stats, labels, output_dir, zero_nans, zero_infs):
+    print("Saving SNR improvements...")
+    snr_improvements = {label: {data: {'Overall': None, 'Effective': None} for data in datasets_stats if data != "Simulation"}
+                        for label in labels}
     for label in labels:
         for data in datasets_stats:
-            if data != "Simulation":
-                print(f"{label}: ")
-                if label in datasets_stats[data]:
-                    snr, non_zero_snr = calculate_mean_snr_improvements(datasets_stats["Simulation"][label]["snr"],
-                                                                        datasets_stats[data][label]["snr"],
-                                                                        zero_nans, zero_infs)
-                    print(f"{data} SNR: {snr}, non-zero SNR improvement: {non_zero_snr} ")
+            if data != "Simulation" and label in datasets_stats[data]:
+                overall, effective = calculate_mean_snr_improvements(datasets_stats["Simulation"][label]["snr"],
+                                                                     datasets_stats[data][label]["snr"],
+                                                                     zero_nans, zero_infs)
+                snr_improvements[label][data]['Overall'] = overall
+                snr_improvements[label][data]['Effective'] = effective
+    df = pd.DataFrame(snr_improvements)
+    df.to_excel(os.path.join(output_dir, "snr_improvements.xlsx"))
+    print("Done.")
 
 
 def loss_analysis(datasets, input_labels, output_label):
@@ -181,7 +192,7 @@ def loss_analysis(datasets, input_labels, output_label):
     loss_types = {'MSE': MSELoss(), 'SSIM': SSIM(dim=input_dim).cuda(), 'PSNR': PSNR()}
 
     loss_stats = {label: {data: {loss_type: 0 for loss_type in loss_types.keys()}
-                          for data in datasets if data != 'simulation'}
+                          for data in datasets if data != 'Simulation'}
                   for label in input_labels}
 
     for label in input_labels:
@@ -193,19 +204,16 @@ def loss_analysis(datasets, input_labels, output_label):
                     t = torch.log1p(targets[j].unsqueeze(0).unsqueeze(0).float())
                     p = torch.log1p(preds[j].unsqueeze(0).unsqueeze(0).float())
                     for loss_type, loss_module in loss_types.items():
-                        loss_stats[label][data][loss_type] += loss_module(t, p) / len(targets)
+                        loss_stats[label][data][loss_type] += (loss_module(t, p) / len(targets)).cpu().item()
     return loss_stats
 
 
-def print_loss_analysis(loss_stats):
-    print("Loss Analysis\n\n\n")
+def save_loss_analysis(loss_stats, save_dir):
+    print("Saving loss stats...")
     for label in loss_stats:
-        print(f'Loss for label {label}:')
-        for data in loss_stats[label]:
-            print(f"Dataset {data}")
-            for loss_type, loss in loss_stats[label][data].items():
-                print(f'{loss_type}: {loss}')
-    print('\n\n')
+        df = pd.DataFrame(loss_stats[label])
+        df.to_excel(os.path.join(save_dir, f"loss-analysis-{label}.xlsx"))
+    print("Done.")
 
 
 def main():
@@ -238,17 +246,17 @@ def main():
                                                                            zero_infs=cfg.zero_infs)
                                         for label in data.keys()}
     print("Done calculating. Plotting statistics...")
-    plot_stats(datasets_stats, cfg.cross_section.x, cfg.cross_section.y,
+    plot_stats(datasets_stats, cfg.plot, cfg.cross_section.x, cfg.cross_section.y,
                cfg.dataset.input_labels + [cfg.dataset.output_label],
                cfg.dataset.output_label,
                cfg.figures.fig_type, cfg.output_path)
     print("Done plotting.")
 
-    print_snr_improvements(datasets_stats, cfg.dataset.input_labels, cfg.zero_nans, cfg.zero_infs)
+    save_snr_improvements(datasets_stats, cfg.dataset.input_labels, cfg.output_path, cfg.zero_nans, cfg.zero_infs)
 
     # Loss Analysis
     loss_stats = loss_analysis(datasets, cfg.dataset.input_labels, cfg.dataset.output_label)
-    print_loss_analysis(loss_stats)
+    save_loss_analysis(loss_stats, cfg.output_path)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,24 @@
+dataset:
+  paths:
+    simulation: "data/test/2D/digimouse/"
+    BM3D: "results/2D/bm4d/digimouse/"
+    DnCNN: "results/2D/dncnn/digimouse/"
+    ResMCNet: "results/2D/resmcnet/digimouse/"
+    Cascaded: "results/2D/cascaded/digimouse/"
+    UNet: "results/2D/unet/digimouse/"
+    DRUNet: "results/2D/drunet/digimouse/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+  crop: "(slice(0, None), slice(0, None), slice(70, 71))"
+  rotate:
+    do: False
+    k: 0
+contour:
+  path: "./matlab/volume/digimouse.mat"
+  name: "digimouse"
+dataset_name_on_rows: True
+output_dir: "./visualization/2D/digimouse/"
+font_size: 50
+fig_size: (100, 15)
+

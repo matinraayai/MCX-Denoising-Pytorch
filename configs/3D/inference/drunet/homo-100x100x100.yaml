@@ -1,0 +1,12 @@
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  output_label: 'x1e9'
+  test_path: 'data/test/3D/homo/100x100x100'
+  padding: 8
+
+model:
+  architecture: 'DRUNet'
+  checkpoint: "checkpoints/3D/blind-denoising/drunet/version_1/checkpoints/epoch=1499-MSE=0.0027-SSIM=0.9851-PSNR=63.9906.ckpt"
+  DRUNet:
+    do_3d: True
+output_dir: 'results/3D/drunet/homo/100x100x100/'

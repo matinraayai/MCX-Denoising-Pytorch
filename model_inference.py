@@ -51,20 +51,20 @@ def main():
 
     for i, (x_tests, y_test) in enumerate(iterator_test):
         predictions = {label: [] for label in cfg.dataset.input_labels}
-        x_tests = {label: x_test.cuda() for label, x_test in x_tests.items()}
+        x_tests = {label: (x_test[0].cuda(), x_test[1].cuda()) for label, x_test in x_tests.items()}
         with torch.no_grad():
-            for label, x_test in x_tests.items():
+            for label, (x_original, x_test) in x_tests.items():
                 start = time()
                 prediction = model(x_test)[test_dataset.unpaded_volume_slice]
+                prediction = (torch.exp(prediction) - 1).squeeze()
+                prediction = torch.where(prediction > 0.03, prediction,
+                                         x_original[test_dataset.unpaded_volume_slice]).cpu().numpy()
                 end = time()
                 iterator_test.set_postfix({"Inf. time": "{:.5f}".format(end - start),
                                            "label": label,
                                            "pred mean": prediction.mean().item(),
-                                           "input mean": x_test.mean().item(),
+                                           "input mean": x_original.mean().item(),
                                            "input shape": x_test.shape})
-                prediction = (torch.exp(prediction) - 1).squeeze()
-                prediction = torch.where(prediction > 0.03, prediction, x_test).cpu().numpy()
-
                 predictions[label].append(prediction)
 
         scio.savemat(os.path.join(cfg.output_dir, f'{i}.mat'), predictions)

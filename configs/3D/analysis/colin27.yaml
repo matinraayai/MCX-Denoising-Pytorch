@@ -1,16 +1,19 @@
 dataset:
   paths:
-    simulation: "data/test/3D/absorb/colin27/"
-    cascaded: "results/3D/cascaded/absorb/colin27/"
-    unet: "results/3D/unet/absorb/colin27/"
-    resmcnet: "results/3D/resmcnet/absorb/colin27/"
-    dncnn: "results/3D/dncnn/absorb/colin27/"
-    drunet: "results/3D/drunet/absorb/colin27/"
-    gpu_anlm: "results/3D/gpu_anlm/absorb/colin27/"
-    nlm: "results/3D/nlm/absorb/colin27/"
-    bm4d: "results/3D/bm4d/absorb/colin27/"
+    simulation: "data/test/3D/colin27/"
+    cascaded: "results/3D/cascaded/colin27/"
+    unet: "results/3D/unet/colin27/"
+    resmcnet: "results/3D/resmcnet/colin27/"
+    dncnn: "results/3D/dncnn/colin27/"
+    drunet: "results/3D/drunet/colin27/"
+    gpu_anlm: "results/3D/gpu_anlm/colin27/"
+    nlm: "results/3D/nlm/colin27/"
+    bm4d: "results/3D/bm4d/colin27/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
+cross_section:
+  x: 50
+  y: 50
 figures:
   fig_type: "save"
 output_path: "./analysis/absorb-colin27"

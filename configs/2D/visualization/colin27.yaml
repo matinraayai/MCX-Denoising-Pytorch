@@ -1,0 +1,24 @@
+dataset:
+  paths:
+    simulation: "data/test/2D/colin27/"
+    BM3D: "results/2D/bm4d/colin27/"
+    DnCNN: "results/2D/dncnn/colin27/"
+    ResMCNet: "results/2D/resmcnet/colin27/"
+    Cascaded: "results/2D/cascaded/colin27/"
+    UNet: "results/2D/unet/colin27/"
+    DRUNet: "results/2D/drunet/colin27/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+  crop: "(50, slice(30, 140), slice(80, None))"
+  rotate:
+    do: False
+    k: 0
+contour:
+  path: "./matlab/volume/colin27_v3.mat"
+  name: "colin27"
+dataset_name_on_rows: True
+output_dir: "./visualization/2D/colin27/"
+font_size: 50
+fig_size: (100, 40)
+

@@ -1,0 +1,12 @@
+dataset:
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  output_label: 'x1e9'
+  test_path: 'data/test/2D/refractive/100x100'
+
+model:
+  architecture: 'UNet'
+  checkpoint: "checkpoints/2D/blind-denoising/unet/version_0/checkpoints/epoch=1499-MSE=0.1426-SSIM=0.8984-PSNR=51.5891.ckpt"
+  UNet:
+    activation_fn: 'F.relu'
+    do_3d: False
+output_dir: 'results/2D/unet/refractive/100x100/'

@@ -1,20 +1,21 @@
 dataset:
   paths:
-    simulation: "data/test/2D/absorb/128x128/"
-    cascaded: "results/2D/cascaded/absorb/128x128/"
-    unet: "results/2D/unet/absorb/128x128/"
-    resmcnet: "results/2D/resmcnet/absorb/128x128/"
-    dncnn: "results/2D/dncnn/absorb/128x128/"
-    drunet: "results/2D/drunet/absorb/128x128/"
-    nlm: "results/2D/nlm/absorb/128x128/"
-    bm3d: "results/2D/bm4d/absorb/128x128/"
+    Simulation: "data/test/2D/absorb/128x128/"
+    "Cascaded DnCNN + UNet": "results/2D/cascaded/absorb/128x128/"
+    UNet: "results/2D/unet/absorb/128x128/"
+    ResMCNet: "results/2D/resmcnet/absorb/128x128/"
+    DnCNN: "results/2D/dncnn/absorb/128x128/"
+    DRUNet: "results/2D/drunet/absorb/128x128/"
+    NLM: "results/2D/nlm/absorb/128x128/"
+    BM3D: "results/2D/bm4d/absorb/128x128/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
+plot: ['Simulation', 'Cascaded DnCNN + UNet', 'DRUNet', 'BM3D']
 cross_section:
   x: 64
 figures:
   fig_type: "save"
-output_path: "./analysis/absorb-128x128"
-zero_infs: False
-zero_nans: False
+output_path: "./analysis/2D/absorb-128x128"
+zero_infs: True
+zero_nans: True
 

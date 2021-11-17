@@ -1,14 +1,14 @@
 dataset:
   paths:
-    simulation: "data/test/3D/absorb/128x128x128/"
-    cascaded: "results/3D/cascaded/absorb/128x128x128/"
-    unet: "results/3D/unet/absorb/128x128x128/"
-    resmcnet: "results/3D/resmcnet/absorb/128x128x128/"
-    dncnn: "results/3D/dncnn/absorb/128x128x128/"
-    drunet: "results/3D/drunet/absorb/128x128x128/"
-    gpu_anlm: "results/3D/gpu_anlm/absorb/128x128x128/"
-    nlm: "results/3D/nlm/absorb/128x128x128/"
-    bm4d: "results/3D/bm4d/absorb/128x128x128/"
+    Simulation: "data/test/3D/absorb/128x128x128/"
+    "Cascaded": "results/3D/cascaded/absorb/128x128x128/"
+#    unet: "results/3D/unet/absorb/128x128x128/"
+#    resmcnet: "results/3D/resmcnet/absorb/128x128x128/"
+#    dncnn: "results/3D/dncnn/absorb/128x128x128/"
+#    DRUNet: "results/3D/drunet/absorb/128x128x128"
+    "GPU ANLM": "results/3D/gpu_anlm/absorb/128x128x128/"
+#    nlm: "results/3D/nlm/absorb/128x128x128/"
+#    bm4d: "results/3D/bm4d/absorb/128x128x128/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
 cross_section:
