@@ -1,19 +1,19 @@
 dataset:
   paths:
-    simulation: "data/test/3D/digimouse/"
-    cascaded: "results/3D/cascaded/digimouse/"
-    unet: "results/3D/unet/digimouse/"
-    resmcnet: "results/3D/resmcnet/digimouse/"
-    dncnn: "results/3D/dncnn/digimouse/"
-    drunet: "results/3D/drunet/digimouse/"
-    gpu_anlm: "results/3D/gpu_anlm/digimouse/"
-    nlm: "results/3D/nlm/digimouse/"
-    bm4d: "results/3D/bm4d/digimouse/"
+    Simulation: "data/test/3D/digimouse/"
+    "Cascaded DnCNN + UNet": "results/3D/cascaded/digimouse/"
+    UNet: "results/3D/unet/digimouse/"
+    ResMCNet: "results/3D/resmcnet/digimouse/"
+    DnCNN: "results/3D/dncnn/digimouse/"
+    DRUNet: "results/3D/drunet/digimouse/"
+    "GPU ANLM": "results/3D/gpu_anlm/digimouse/"
+    BM4D: "results/3D/bm4d/digimouse/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
+plot: []
 figures:
   fig_type: "save"
-output_path: "./analysis/absorb-digimouse/"
+output_path: "./analysis/3D/absorb-digimouse/"
 zero_infs: False
 zero_nans: False
 

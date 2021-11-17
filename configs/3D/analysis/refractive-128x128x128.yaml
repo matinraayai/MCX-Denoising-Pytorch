@@ -2,15 +2,15 @@ dataset:
   paths:
     Simulation: "data/test/3D/refractive/128x128x128/"
     "Cascaded DnCNN + UNet": "results/3D/cascaded/refractive/128x128x128/"
-#    "UNet": "results/3D/unet/refractive/128x128x128/"
-#    "ResMCNet": "results/3D/resmcnet/refractive/128x128x128/"
-#    "DnCNN": "results/3D/dncnn/refractive/128x128x128/"
-#    "DRUNet": "results/3D/drunet/refractive/128x128x128/"
+    UNet: "results/3D/unet/refractive/128x128x128/"
+    ResMCNet: "results/3D/resmcnet/refractive/128x128x128/"
+    DnCNN: "results/3D/dncnn/refractive/128x128x128/"
+    DRUNet: "results/3D/drunet/refractive/128x128x128/"
     "GPU ANLM": "results/3D/gpu_anlm/refractive/128x128x128/"
-#    "NLM": "results/3D/nlm/refractive/128x128x128/"
-#    "BM4D": "results/3D/bm4d/refractive/128x128x128/"
+    BM4D: "results/3D/bm4d/refractive/128x128x128/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
+plot: ['Simulation', 'Cascaded DnCNN + UNet', 'DRUNet', 'GPU ANLM']
 cross_section:
   x: 64
   y: 64

@@ -2,14 +2,15 @@ dataset:
   paths:
     Simulation: "data/test/3D/absorb/64x64x64/"
     "Cascaded DnCNN + UNet": "results/3D/cascaded/absorb/64x64x64/"
-#    UNet: "results/3D/unet/absorb/64x64x64/"
-#    ResMCNet: "results/3D/resmcnet/absorb/64x64x64/"
-#    DnCNN: "results/3D/dncnn/absorb/64x64x64/"
+    UNet: "results/3D/unet/absorb/64x64x64/"
+    ResMCNet: "results/3D/resmcnet/absorb/64x64x64/"
+    DnCNN: "results/3D/dncnn/absorb/64x64x64/"
     DRUNet: "results/3D/drunet/absorb/64x64x64/"
     "GPU ANLM": "results/3D/gpu_anlm/absorb/64x64x64/"
-#    "BM4D": "results/3D/bm4d/absorb/64x64x64/"
+    BM4D: "results/3D/bm4d/absorb/64x64x64/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
+plot: ['Simulation', 'Cascaded DnCNN + UNet', 'DRUNet', 'GPU ANLM']
 cross_section:
   x: 32
   y: 32
