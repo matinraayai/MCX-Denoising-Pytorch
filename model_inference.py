@@ -11,7 +11,10 @@ import tqdm
 from config import get_default_inference_cfg
 from time import time
 import scipy.io as scio
+from data.dataset import norm
 
+CUTOFF = 0.03
+SCALE = 10 ** 7
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script for denoising model inference")
@@ -51,14 +54,16 @@ def main():
 
     for i, (x_tests, y_test) in enumerate(iterator_test):
         predictions = {label: [] for label in cfg.dataset.input_labels}
-        x_tests = {label: (x_test[0].cuda(), x_test[1].cuda()) for label, x_test in x_tests.items()}
         with torch.no_grad():
             for label, (x_original, x_test) in x_tests.items():
                 start = time()
-                prediction = model(x_test)[test_dataset.unpaded_volume_slice]
-                prediction = (torch.exp(prediction) - 1).squeeze()
-                prediction = torch.where(prediction > 0.03, prediction,
-                                         x_original[test_dataset.unpaded_volume_slice]).cpu().numpy()
+                x_original, higher = x_original.cuda(), x_test.cuda()
+                lower = norm(x_original * SCALE)
+                lower = model(lower)[test_dataset.unpaded_volume_slice]
+                higher = model(higher)[test_dataset.unpaded_volume_slice]
+                lower = (torch.exp(lower) - 1) / SCALE
+                higher = torch.exp(higher) - 1
+                prediction = torch.where(x_original[test_dataset.unpaded_volume_slice] > CUTOFF, higher, lower).squeeze().cpu().numpy()
                 end = time()
                 iterator_test.set_postfix({"Inf. time": "{:.5f}".format(end - start),
                                            "label": label,

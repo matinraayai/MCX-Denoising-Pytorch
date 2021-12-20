@@ -16,8 +16,12 @@ def make_path_list(dir_name):
     return sorted([os.path.join(dir_name, file_name) for file_name in os.listdir(dir_name)])
 
 
-def read_norm_sqz_from_mat_file(mat_file, label):
-    return torch.log1p(torch.from_numpy(mat_file[label])).unsqueeze(0).float()
+def read_sqz_from_mat_file(mat_file, label):
+    return torch.from_numpy(mat_file[label]).unsqueeze(0).float()
+
+
+def norm(v):
+    return torch.log1p(v)
 
 
 def random_crop(x, y, crop_size):
@@ -67,30 +71,33 @@ class OsaDataset(torch.utils.data.Dataset):
         self.is_train = is_train
         self.augmentor = augmentor
         self.mat_files = [spio.loadmat(path, squeeze_me=True) for path in self.paths]
-        sample_output_tensor_shape = read_norm_sqz_from_mat_file(self.mat_files[0], self.output_label).shape
-        self.unpaded_volume_slice = (slice(1),) + tuple(slice(0, s) for s in sample_output_tensor_shape)
+        sample_output_tensor_shape = read_sqz_from_mat_file(self.mat_files[0], self.output_label).shape
+        self.unpaded_volume_slice = (slice(None),) + tuple(slice(0, s) for s in sample_output_tensor_shape)
         self.padding = padding
 
     def __getitem_test(self, item):
         mat_file = self.mat_files[item]
-        x = {input_label: read_norm_sqz_from_mat_file(mat_file, input_label) for input_label in self.input_labels}
-        y = read_norm_sqz_from_mat_file(mat_file, self.output_label)
+        xs = {input_label: read_sqz_from_mat_file(mat_file, input_label) for input_label in self.input_labels}
+        xs = {input_label: (x, norm(x)) for input_label, x in xs.items()}
+        y = norm(read_sqz_from_mat_file(mat_file, self.output_label))
         if self.crop_size is not None:
             assert self.crop_size[0] < y.shape[1] and self.crop_size[1] < y.shape[2]
             crop_pos = (0, ) * (len(y.shape) - 1)
             for input_label in self.input_labels:
-                x[input_label] = crop_volume(x[input_label], crop_pos, self.crop_size)
+                xs[input_label] = (crop_volume(xs[input_label][0], crop_pos, self.crop_size),
+                                   crop_volume(xs[input_label][1], crop_pos, self.crop_size))
             y = crop_volume(y, crop_pos, self.crop_size)
         for input_label in self.input_labels:
-            x[input_label] = pad_volume_to_nearest_nth(x[input_label], self.padding)
+            xs[input_label] = (pad_volume_to_nearest_nth(xs[input_label][0], self.padding),
+                               pad_volume_to_nearest_nth(xs[input_label][1], self.padding))
         y = pad_volume_to_nearest_nth(y, self.padding)
-        return x, y
+        return xs, y
 
     def __getitem_train(self, item):
         mat_file = self.mat_files[item // len(self.input_labels)]
         input_label = self.input_labels[item % len(self.input_labels)]
-        x = read_norm_sqz_from_mat_file(mat_file, input_label)
-        y = read_norm_sqz_from_mat_file(mat_file, self.output_label)
+        x = norm(read_sqz_from_mat_file(mat_file, input_label))
+        y = norm(read_sqz_from_mat_file(mat_file, self.output_label))
         # Crop
         if self.crop_size is not None:
             assert self.crop_size[0] < x.shape[1] and self.crop_size[1] < x.shape[2]
