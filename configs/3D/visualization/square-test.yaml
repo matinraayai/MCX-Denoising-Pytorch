@@ -1,0 +1,12 @@
+dataset:
+  paths:
+    'Absorbing Square': "data/test/3D/absorb/100x100x100/"
+    'Homogenous': "data/test/3D/homo/100x100x100/"
+    'Refractive Square': "data/test/3D/refractive/100x100x100/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+dataset_name_on_rows: True
+output_path: "./visualization/3D/square-test"
+font_size: 35
+fig_size: (60, 35)
+

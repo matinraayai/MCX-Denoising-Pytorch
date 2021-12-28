@@ -11,7 +11,7 @@ dataset:
 
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
-  crop: "(50, slice(30, 140), slice(80, None))"
+  crop: "(75, slice(30, 140), slice(80, None))"
   rotate:
     do: False
     k: 0
@@ -21,5 +21,5 @@ contour:
 dataset_name_on_rows: True
 output_dir: "./visualization/3D/colin27/"
 font_size: 50
-fig_size: (100, 40)
+fig_size: (90, 45)
 

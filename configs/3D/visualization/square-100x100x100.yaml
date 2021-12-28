@@ -4,10 +4,10 @@ dataset:
       'Absorbing Square': "data/test/3D/absorb/100x100x100/"
       'Refractive Square': "results/3D/cascaded/refractive/100x100x100/"
       'Homogenous': "data/test/3D/homo/100x100x100/"
-#    BM4D:
-#      'Absorbing Square': "results/3D/bm4d/absorb/100x100x100/"
-#      'Refractive Square': "results/3D/bm4d/refractive/100x100x100/"
-#      'Homogenous': "results/3D/bm4d/homo/100x100x100/"
+    BM4D:
+      'Absorbing Square': "results/3D/bm4d/absorb/100x100x100/"
+      'Refractive Square': "results/3D/bm4d/refractive/100x100x100/"
+      'Homogenous': "results/3D/bm4d/homo/100x100x100/"
     'GPU ANLM':
       'Absorbing Square': "results/3D/gpu_anlm/absorb/100x100x100/"
       'Refractive Square': "results/3D/cascaded/refractive/100x100x100/"
@@ -38,5 +38,5 @@ dataset:
 dataset_name_on_rows: True
 output_path: "./visualization/3D/square-100x100x100"
 font_size: 35
-fig_size: (80, 20)
+fig_size: (70, 25)
 
