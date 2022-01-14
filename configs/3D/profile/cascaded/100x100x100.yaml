@@ -1,0 +1,10 @@
+model:
+  architecture: 'Cascaded'
+  checkpoint: "checkpoints/3D/blind-denoising/cascaded/version_2/checkpoints/epoch=1494-MSE=0.0043-SSIM=0.9731-PSNR=62.2551.ckpt"
+  Cascaded:
+    do_3d: True
+    num_dncnn_layers: 17
+    unet_activation_fn: 'F.relu'
+input_dims: (1, 1, 100, 100, 100)
+num_iterations: 100
+unpaded_volume_slice: "slice(None), slice(None), slice(0, 100), slice(0, 100), slice(0, 100)"
