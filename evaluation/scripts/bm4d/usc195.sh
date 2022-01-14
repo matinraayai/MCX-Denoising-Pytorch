@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -N 1                # Number of nodes
 #SBATCH -p ce-mri          # Partition to submit to
-#SBATCH -c 64
+#SBATCH -c 48
 #SBATCH --mem=100000         # Memory pool for all cores (see also --mem-per-cpu)
-#SBATCH -o colin27.out  # %j inserts jobid
-#SBATCH -e colin27.err  # %j inserts jobid
+#SBATCH -o bm4d-usc195.out  # %j inserts jobid
+#SBATCH -e bm4d-usc195.err  # %j inserts jobid
 source ~/modules/pytorch/latest
-python benchmark_bm4d+nlm.py --simulation-path "../data/test/3D/colin27/" --output-path "../results/3D/{:s}/colin27/"
+python benchmark_bm4d.py --simulation-path "../data/test/3D/USC195/" --output-path "../results/3D/bm4d/usc195/"
