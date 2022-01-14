@@ -10,12 +10,12 @@ dataset:
     BM3D: "results/2D/bm4d/homo/128x128/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
-plot: ['Simulation', 'Cascaded DnCNN + UNet', 'DRUNet', 'BM3D']
+plot: ['Simulation', 'Cascaded DnCNN + UNet', 'BM3D']
 cross_section:
   x: 64
 figures:
   fig_type: "save"
 output_path: "./analysis/2D/homo-128x128"
-zero_infs: True
-zero_nans: True
+zero_infs: False
+zero_nans: False
 
