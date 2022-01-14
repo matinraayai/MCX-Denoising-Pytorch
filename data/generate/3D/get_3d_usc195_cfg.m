@@ -1,7 +1,6 @@
 function cfg = get_3d_usc195_cfg(gpu_ids)
     load('../../matlab/volume/fullhead_atlas.mat');
     %% prepare cfg for MCX simulation
-    cfg.outputtype='fluence';
 
     % tissue labels:0-ambient air,1-scalp,2-skull,3-csf,4-gray matter,5-white matter,6-air cavities
     cfg.vol=USC_atlas;
@@ -22,8 +21,8 @@ function cfg = get_3d_usc195_cfg(gpu_ids)
 
     % time windows
     cfg.tstart=0;
-    cfg.tend=5e-9;
-    cfg.tstep=5e-9;
+    cfg.tend=1e-8;
+    cfg.tstep=1e-8;
 
     % other simulation parameters
     cfg.isspecular=0;

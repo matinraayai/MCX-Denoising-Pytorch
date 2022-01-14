@@ -24,5 +24,5 @@ function cfg = random_train_3d_cfg(imsize, num_props, gpu_ids)
     cfg.prop = [0 0 1 1; myprop];
     cfg.tstart = 0;
     cfg.seed = randi(2^31 - 1);
-    cfg.tend = 1e-8;
-    cfg.tstep = 1e-8;
+    cfg.tend = 1e-10 * randi(10);
+    cfg.tstep = cfg.tend;
