@@ -1,7 +1,8 @@
 dataset:
-  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+  input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8', 'x1e9']
   output_label: 'x1e9'
-  test_path: 'data/validation/2D/128x128'
+  test_path: 'data/test/2D/USE195'
+  padding: 8
 
 model:
   architecture: 'DRUNet'
@@ -9,4 +10,4 @@ model:
   DRUNet:
     do_3d: False
     num_res_blocks: 4
-output_dir: 'results/2D/drunet/validation/128x128/'
+output_dir: 'results/2D/drunet/use195'
