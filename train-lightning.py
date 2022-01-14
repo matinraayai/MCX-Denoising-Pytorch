@@ -37,12 +37,6 @@ class TrainLightningModule(LightningModule):
 
     def training_step(self, batch, batch_idx):
         _, x, y = batch
-        # if cfg.model.noise_map:
-        #     #TODO: Fix noise level input
-        #     noise_level = [float(label[-1]) for label in label_batch]
-        #     noise_map = torch.tensor([noise_level]).cuda().repeat(1, *cfg.dataset.crop_size, 1).permute(3, 0, 1, 2)
-        #     print(noise_map.shape)
-        #     x_batch_train = torch.cat([x_batch_train, noise_map], dim=1)
         y_hat = self.model(x)
         return self.train_loss(y, y_hat)
 
