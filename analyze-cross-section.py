@@ -3,7 +3,7 @@ import numpy as np
 import argparse
 import os
 from evaluation.utils import read_mat_files, prepare_label_to_idx_mapping_for_analysis
-from config import read_analysis_cfg_file
+from config import read_cross_section_analysis_cfg_file
 import pandas as pd
 from data.visualization import get_pretty_photon_level
 from typing import *
@@ -13,9 +13,7 @@ def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Script for analysing cross section behavior of denoising results"
                                                  " for both 2D and 3D."
                                                  " Calculates both the metric results and cross section statistics.")
-    parser.add_argument('--config-file', type=str, help='configuration file (yaml). '
-                                                        'Refer to config.py and the config/analysis directory'
-                                                        'for more info on the format.')
+    parser.add_argument('--config-file', type=str, help='configuration file (yaml). ')
     return parser.parse_args()
 
 
@@ -203,7 +201,7 @@ def main():
     print(args)
 
     # configurations
-    cfg = read_analysis_cfg_file(args.config_file)
+    cfg = read_cross_section_analysis_cfg_file(args.config_file)
     print("Configuration details:")
     print(cfg)
 

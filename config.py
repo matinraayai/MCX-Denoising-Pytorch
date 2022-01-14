@@ -288,7 +288,7 @@ def get_default_inference_cfg():
     return _C
 
 
-def get_default_analysis_cfg():
+def get_default_cross_section_analysis_cfg():
     """
     Creates a YACS CfgNode with all the default options needed to analyze filtering results.
     :return: a YACS.CfgNode with all the default options for analysis
@@ -297,20 +297,34 @@ def get_default_analysis_cfg():
     # Dataset
     _C.dataset = CfgNode()
     _C.dataset.paths = CfgNode()
-    _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
-    _C.dataset.output_label = 'x1e9'
+    _C.dataset.labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8', 'x1e9']
     # Cross section coordinates
     _C.cross_section = CfgNode()
     _C.cross_section.x = 50
     _C.cross_section.y = None
     # Figure options
     _C.figures = CfgNode()
+    _C.figures.legend = True
     _C.figures.fig_type = "display only"
     _C.output_path = "."
     # Zeroing options
     _C.zero_nans = False
     _C.zero_infs = False
+    return _C
 
+
+def get_default_global_metrics_analysis_cfg():
+    """
+    Creates a YACS CfgNode with all the default options needed to analyze global metrics of the filtering results
+    :return: a YACS.CfgNode with all the default options for analysis
+    """
+    _C = CfgNode()
+    # Dataset
+    _C.dataset = CfgNode()
+    _C.dataset.paths = CfgNode()
+    _C.dataset.input_labels = ['x1e5', 'x1e6', 'x1e7', 'x1e8']
+    _C.dataset.output_label = 'x1e9'
+    _C.output_path = "."
     return _C
 
 
@@ -319,6 +333,7 @@ def get_default_profiling_cfg():
     _C = add_model_cfg(_C)
     _C.input_dims = (64, 64, 64)
     _C.num_iterations = 100
+    _C.unpaded_volume_slice = ""
     return _C
 
 
@@ -357,8 +372,17 @@ def read_training_cfg_file(config_file_path):
     return cfg
 
 
-def read_analysis_cfg_file(config_file_path):
-    cfg = get_default_analysis_cfg()
+def read_cross_section_analysis_cfg_file(config_file_path):
+    cfg = get_default_cross_section_analysis_cfg()
+    cfg.update()
+    cfg.set_new_allowed(True)
+    cfg.merge_from_file(config_file_path)
+    cfg.freeze()
+    return cfg
+
+
+def read_global_metrics_analysis_cfg_file(config_file_path):
+    cfg = get_default_global_metrics_analysis_cfg()
     cfg.update()
     cfg.set_new_allowed(True)
     cfg.merge_from_file(config_file_path)

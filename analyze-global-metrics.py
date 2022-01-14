@@ -5,16 +5,14 @@ from evaluation.utils import read_mat_files, prepare_label_to_idx_mapping_for_an
 from model.loss import SSIM, PSNR
 from torch.nn import MSELoss
 import torch
-from config import read_analysis_cfg_file
+from config import read_global_metrics_analysis_cfg_file
 import pandas as pd
 
 
 def get_args():
     parser = argparse.ArgumentParser(description="Script for analysing global metrics of the filtering results "
                                                  "for both 2D and 3D.")
-    parser.add_argument('--config-file', type=str, help='configuration file (yaml). '
-                                                        'Refer to config.py and the config/analysis directory'
-                                                        'for more info on the format.')
+    parser.add_argument('--config-file', type=str, help='configuration file (yaml). ')
     return parser.parse_args()
 
 
@@ -41,7 +39,8 @@ def loss_analysis(datasets, input_labels, output_label):
                     for loss_type, loss_module in loss_types.items():
                         l = (loss_module(t, p) / len(targets)).cpu().item()
                         loss_stats[label][data][loss_type] += l
-                        iterator.set_postfix({"dataset": data, "label": label, "loss": l, "target mean": t.mean().item(),
+                        iterator.set_postfix({"dataset": data, "label": label, "loss": l,
+                                              "target mean": t.mean().item(),
                                               "prediction mean": p.mean().item()})
     return loss_stats
 
@@ -62,7 +61,7 @@ def main():
     print(args)
 
     # configurations
-    cfg = read_analysis_cfg_file(args.config_file)
+    cfg = read_global_metrics_analysis_cfg_file(args.config_file)
     print("Configuration details:")
     print(cfg)
 
