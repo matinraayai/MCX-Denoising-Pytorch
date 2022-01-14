@@ -10,15 +10,16 @@ from data.visualization import get_pretty_photon_level
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Script for analysing filtering results for both 2D and 3D."
-                                                 "Calculates both the metric results and cross section statistics.")
+    parser = argparse.ArgumentParser(description="Script for analysing cross section behavior of denoising results"
+                                                 " for both 2D and 3D."
+                                                 " Calculates both the metric results and cross section statistics.")
     parser.add_argument('--config-file', type=str, help='configuration file (yaml). '
                                                         'Refer to config.py and the config/analysis directory'
                                                         'for more info on the format.')
     return parser.parse_args()
 
 
-def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 50), zero_nans=True, zero_infs=True):
+def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 50), zero_nans=False, zero_infs=False):
     """
     https://3.basecamp.com/3261719/buckets/447257/todos/1194253648#__recording_1236125346
     Computes the SNR, log10 of mean and log10 of std over a cross section on the x,y-axis of the fluence volume.
@@ -66,8 +67,7 @@ def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 5
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
-def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labels, output_label,
-               fig_type, output_path):
+def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labels, fig_type, output_path):
     """
     Le very complicated plotting function. Basically a wrapper around all the plotting needs this script tries to
     address, which is plotting every cross section statistics for every dataset and every label.
@@ -84,7 +84,6 @@ def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labe
     :param y_cross_section: Y-axis cross section (used for axis labeling)
     :param labels: All the labels present in the dataset, including input labels and the output label. It is used for
     convenience, since all the labels can be extracted from the stat_dicts
-    :param output_label: the output label
     :param fig_type: Type of the figure, either "save" as an image to the file system or "display" or both.
     :param output_path: In case of "save" fig_type, path to save the figures to. Each figure will be saved in the path
     with the name of the stat e.g. "snr.png".
