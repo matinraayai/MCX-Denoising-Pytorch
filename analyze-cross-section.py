@@ -1,4 +1,3 @@
-import matplotlib.font_manager
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
@@ -7,9 +6,10 @@ from evaluation.utils import read_mat_files, prepare_label_to_idx_mapping_for_an
 from config import read_analysis_cfg_file
 import pandas as pd
 from data.visualization import get_pretty_photon_level
+from typing import *
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Script for analysing cross section behavior of denoising results"
                                                  " for both 2D and 3D."
                                                  " Calculates both the metric results and cross section statistics.")
@@ -19,7 +19,9 @@ def get_args():
     return parser.parse_args()
 
 
-def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 50), zero_nans=False, zero_infs=False):
+def compute_cross_section_stats(fluence_volume: np.ndarray,
+                                cross_section_coordinates: Tuple[int, int],
+                                zero_nans: bool, zero_infs: bool):
     """
     https://3.basecamp.com/3261719/buckets/447257/todos/1194253648#__recording_1236125346
     Computes the SNR, log10 of mean and log10 of std over a cross section on the x,y-axis of the fluence volume.
@@ -67,7 +69,8 @@ def compute_cross_section_stats(fluence_volume, cross_section_coordinates=(50, 5
     return {'means': means, 'stds': stds, 'snr': snr_results}
 
 
-def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labels, fig_type, output_path):
+def plot_stats(stat_dicts: dict, x_cross_section: int, y_cross_section: int, labels: Iterable[str],
+               fig_type: str, legend: True, output_path: str):
     """
     Le very complicated plotting function. Basically a wrapper around all the plotting needs this script tries to
     address, which is plotting every cross section statistics for every dataset and every label.
@@ -79,14 +82,14 @@ def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labe
     stat_name (e.g. snr) -> dataset_name (e.g. simulation) -> label (e.g. 'x1e5') -> fluence map
     (e.g. np.ndarray(100, 100, 100))
     Plot sizes are fixed and adjusted manually in the function.
-    :param plot_datasets: the datasets in the stat_dicts to plot.
     :param x_cross_section: X-axis cross section (used for axis labeling)
     :param y_cross_section: Y-axis cross section (used for axis labeling)
     :param labels: All the labels present in the dataset, including input labels and the output label. It is used for
     convenience, since all the labels can be extracted from the stat_dicts
-    :param fig_type: Type of the figure, either "save" as an image to the file system or "display" or both.
+    :param fig_type: Type of the figure, either "save" as an image to the file system or "display" or both
+    :param legend: whether the plot has a legend or not
     :param output_path: In case of "save" fig_type, path to save the figures to. Each figure will be saved in the path
-    with the name of the stat e.g. "snr.png".
+    with the name of the stat e.g. "snr.pdf"
     :return: None
     """
     def add_label_to_stat_plot(label, stat_name, color):
@@ -106,7 +109,7 @@ def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labe
         linestyles = ['solid', 'dotted', 'dashed', 'dashdot']
         i = 0
         for (data_name, data) in stat_dicts.items():
-            if label in data and data_name in plot_datasets:
+            if label in data:
                 x_values = np.arange(0, len(data[label][stat_name]))
                 y_values = data[label][stat_name]
                 plt.plot(x_values, y_values, color=color, label=f"{plot_label} {data_name}",
@@ -123,11 +126,7 @@ def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labe
         :return: None
         """
         c_map = plt.cm.get_cmap('hsv', 6)
-        # font_dict = {'family': 'dejaVu Serif'}
-        # import matplotlib.font_manager as font_manager
         plt.rcParams["font.family"] = "dejaVu Serif"
-        # matplotlib.font_manager.get_font()
-        # font = font_manager.(*font_dict)
         for i, label in enumerate(labels):
             add_label_to_stat_plot(label, stat_name, c_map(i))
         if legend:
@@ -147,16 +146,16 @@ def plot_stats(stat_dicts, plot_datasets, x_cross_section, y_cross_section, labe
 
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    legend = f'Z over Cross Section at X = {x_cross_section} mm, Y = {y_cross_section} mm (mm)' \
+    x_axis_label = f'Z over Cross Section at X = {x_cross_section} mm, Y = {y_cross_section} mm (mm)' \
         if y_cross_section else f'Y over Cross Section at X = {x_cross_section} mm'
-    create_stat_plot('snr', legend, 'SNR (Db)', True)
+    create_stat_plot('snr', x_axis_label, 'SNR (Db)', legend)
 
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('means', legend, '$log_{10}$(mean) ($W/mm^2$)', True)
+    create_stat_plot('means', x_axis_label, '$log_{10}$(mean) ($W/mm^2$)', legend)
     fig = plt.figure(figsize=(10, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('stds', legend, '$log_{10}$(STD) (Δ$W/mm^2$)', True)
+    create_stat_plot('stds', x_axis_label, '$log_{10}$(STD) (Δ$W/mm^2$)', legend)
 
 
 def calculate_mean_snr_improvements(original_snr_array, target_snr_array, zero_infs):
@@ -226,13 +225,12 @@ def main():
                                                                            zero_infs=cfg.zero_infs)
                                         for label in data.keys()}
     print("Done calculating. Plotting statistics...")
-    plot_stats(datasets_stats, cfg.plot, cfg.cross_section.x, cfg.cross_section.y,
-               cfg.dataset.input_labels + [cfg.dataset.output_label],
-               cfg.dataset.output_label,
-               cfg.figures.fig_type, cfg.output_path)
+    plot_stats(datasets_stats, cfg.cross_section.x,
+               cfg.cross_section.y, cfg.dataset.labels,
+               cfg.figures.fig_type, cfg.figures.legend, cfg.output_path)
     print("Done plotting.")
 
-    save_snr_improvements(datasets_stats, cfg.dataset.input_labels, cfg.output_path, cfg.zero_infs)
+    save_snr_improvements(datasets_stats, cfg.dataset.labels, cfg.output_path, cfg.zero_infs)
 
 
 if __name__ == '__main__':
