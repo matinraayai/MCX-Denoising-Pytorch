@@ -1,0 +1,16 @@
+dataset:
+  paths:
+    Simulation: "data/test/3D/homo/64x64x64/"
+    "Cascaded DnCNN + UNet": "results/3D/cascaded/homo/64x64x64/"
+    "GPU ANLM": "results/3D/gpu_anlm/homo/64x64x64/"
+  labels: ["x1e5", "x1e6", "x1e7", "x1e8", "x1e9"]
+cross_section:
+  x: 32
+  y: 32
+figures:
+  legend: True
+  fig_type: "save"
+output_path: "./analysis/3D/homo-64x64x64"
+zero_infs: False
+zero_nans: False
+

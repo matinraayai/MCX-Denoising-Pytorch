@@ -1,0 +1,16 @@
+dataset:
+  paths:
+    Simulation: "data/test/3D/colin27/"
+    "Cascaded DnCNN + UNet": "results/3D/cascaded/colin27/"
+    "GPU ANLM": "results/3D/gpu_anlm/colin27/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8", "x1e9"]
+cross_section:
+  x: 75
+  y: 67
+figures:
+  legend: True
+  fig_type: "save"
+output_path: "./analysis/3D/colin27"
+zero_infs: False
+zero_nans: False
+

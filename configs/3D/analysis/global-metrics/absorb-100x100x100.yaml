@@ -1,0 +1,14 @@
+dataset:
+  paths:
+    Simulation: "data/test/3D/absorb/100x100x100/"
+    "Cascaded DnCNN + UNet": "results/3D/cascaded/absorb/100x100x100/"
+    UNet: "results/3D/unet/absorb/100x100x100/"
+    ResMCNet: "results/3D/resmcnet/absorb/100x100x100/"
+    DnCNN: "results/3D/dncnn/absorb/100x100x100/"
+    DRUNet: "results/3D/drunet/absorb/100x100x100/"
+    "GPU ANLM": "results/3D/gpu_anlm/absorb/100x100x100/"
+    BM4D: "results/3D/bm4d/absorb/100x100x100/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
+  output_label: "x1e9"
+output_path: "./analysis/3D/absorb-100x100x100"
+

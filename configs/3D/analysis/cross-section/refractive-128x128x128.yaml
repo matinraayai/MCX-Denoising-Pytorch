@@ -1,0 +1,16 @@
+dataset:
+  paths:
+    Simulation: "data/test/3D/refractive/128x128x128/"
+    "Cascaded DnCNN + UNet": "results/3D/cascaded/refractive/128x128x128/"
+    "GPU ANLM": "results/3D/gpu_anlm/refractive/128x128x128/"
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8", "x1e9"]
+cross_section:
+  x: 64
+  y: 64
+figures:
+  legend: True
+  fig_type: "save"
+output_path: "./analysis/3D/refractive-128x128x128"
+zero_infs: False
+zero_nans: False
+

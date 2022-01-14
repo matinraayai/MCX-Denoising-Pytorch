@@ -10,12 +10,4 @@ dataset:
     BM3D: "results/2D/bm4d/absorb/100x100/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
-plot: ['Simulation', 'Cascaded DnCNN + UNet', 'BM3D']
-cross_section:
-  x: 50
-figures:
-  fig_type: "save"
 output_path: "./analysis/2D/absorb-100x100"
-zero_infs: False
-zero_nans: False
-
