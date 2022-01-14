@@ -44,16 +44,16 @@ def read_mat_files(directory, mapping='label to filename', max_num_files=-1):
         iterator.set_description(f'Reading from {i}-th path: {path}')
         mat_file = sio.loadmat(path)
         labels = all_labels_in_mat(path)
-        iterator.set_postfix({'labels': labels})
         for label in labels:
             if mapping == 'label to filename':
                 if label not in output:
                     output[label] = {}
-                output[label][file_name] = mat_file[label]
+                output[label][file_name] = mat_file[label].squeeze()
             if mapping == 'filename to label':
                 if file_name not in output:
                     output[file_name] = {}
-                output[file_name][label] = mat_file[label]
+                output[file_name][label] = mat_file[label].squeeze()
+            iterator.set_postfix({'label': label, 'shape': mat_file[label].squeeze().shape})
     return output
 
 
