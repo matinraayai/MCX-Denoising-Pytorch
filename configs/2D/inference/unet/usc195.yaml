@@ -1,7 +1,8 @@
 dataset:
   input_labels: ['x1e5', 'x1e6', 'x1e7', 'x1e8']
   output_label: 'x1e9'
-  test_path: 'data/validation/2D/128x128'
+  test_path: 'data/test/2D/USE195'
+  padding: 4
 
 model:
   architecture: 'UNet'
@@ -9,4 +10,4 @@ model:
   UNet:
     activation_fn: 'F.relu'
     do_3d: False
-output_dir: 'results/2D/unet/validation/128x128/'
+output_dir: 'results/2D/unet/use195'
