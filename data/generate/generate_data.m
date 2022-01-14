@@ -1,5 +1,6 @@
 function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_range, img_dims, gpu_ids)
     addpath(genpath('.'));
+    addpath('../../matlab');
     if length(shape_range) == 1
         shape_range = [shape_range, shape_range];
     end
@@ -16,7 +17,7 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
             cfg_lambda = @() (get_2d_colin27_cfg(gpu_ids));
         elseif strcmp(type, 'digimouse')
             cfg_lambda = @() (get_2d_digimouse_cfg(gpu_ids));
-        elseif strcmp(type, 'use195')
+        elseif strcmp(type, 'usc195')
             cfg_lambda = @() (get_2d_usc195_cfg(gpu_ids));
         else
             throw(MException(fprintf('invalid data type %s\n', type)));
@@ -34,7 +35,7 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
             cfg_lambda = @() (get_3d_colin27_cfg(gpu_ids));
         elseif strcmp(type, 'digimouse')
             cfg_lambda = @() (get_3d_digimouse_cfg(gpu_ids));
-        elseif strcmp(type, 'use195')
+        elseif strcmp(type, 'usc195')
             cfg_lambda = @() (get_3d_usc195_cfg(gpu_ids));
         else
             throw(MException(fprintf('invalid data type %s\n', type)));
