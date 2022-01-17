@@ -11,7 +11,7 @@ dataset:
 
   input_labels: ["x1e5", "x1e7"]
   output_label: "x1e9"
-  crop: "(slice(0, None), slice(0, None), 50)"
+  crop: "(slice(20, -22), slice(45, -25), 50)"
   rotate:
     do: True
     k: 0
@@ -21,5 +21,5 @@ contour:
 dataset_name_on_rows: True
 output_dir: "./visualization/3D/digimouse/"
 font_size: 70
-fig_size: (90, 17)
+fig_size: (90, 10)
 
