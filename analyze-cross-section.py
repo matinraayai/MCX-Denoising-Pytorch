@@ -125,10 +125,11 @@ def plot_stats(stat_dicts: dict, x_cross_section: int, y_cross_section: int, lab
         """
         c_map = plt.cm.get_cmap('hsv', 6)
         plt.rcParams["font.family"] = "dejaVu Serif"
+        plt.rcParams["font.size"] = 18
         for i, label in enumerate(labels):
             add_label_to_stat_plot(label, stat_name, c_map(i))
         if legend:
-            plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+            plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc='lower left', ncol=len(labels), mode="expand")
         plt.xlabel(x_axis_label)
         plt.ylabel(y_axis_label)
         """These arguments are supplied by the outer function scope."""
@@ -142,18 +143,18 @@ def plot_stats(stat_dicts: dict, x_cross_section: int, y_cross_section: int, lab
             plt.savefig(os.path.join(output_path, f'{stat_name}.pdf'), bbox_inches='tight')
         plt.close()
 
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(12, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    x_axis_label = f'Z over Cross Section at X = {x_cross_section} mm, Y = {y_cross_section} mm (mm)' \
-        if y_cross_section else f'Y over Cross Section at X = {x_cross_section} mm'
-    create_stat_plot('snr', x_axis_label, 'SNR (Db)', legend)
+    x_axis_label = f'z (mm)' \
+        if y_cross_section else f'y (mm)'
+    create_stat_plot('snr', x_axis_label, 'SNR (dB)', legend)
 
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(12, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('means', x_axis_label, '$log_{10}$(mean) ($W/mm^2$)', legend)
-    fig = plt.figure(figsize=(10, 6))
+    create_stat_plot('means', x_axis_label, '$log_{10}$(fluence rate) ($1/mm^2$)', legend)
+    fig = plt.figure(figsize=(12, 6))
     fig.subplots_adjust(right=0.63, bottom=0.25)
-    create_stat_plot('stds', x_axis_label, '$log_{10}$(STD) (Δ$W/mm^2$)', legend)
+    create_stat_plot('stds', x_axis_label, '$log_{10}$(STD) ($1/mm^4$)', legend)
 
 
 def calculate_mean_snr_improvements(original_snr_array, target_snr_array, zero_infs):
