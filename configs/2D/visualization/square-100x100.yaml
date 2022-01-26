@@ -1,37 +1,37 @@
 dataset:
   paths:
     simulation:
-      'Absorbing Square': "data/test/3D/absorb/100x100/"
-      'Refractive Square': "results/3D/cascaded/refractive/100x100/"
-      'Homogenous': "data/test/3D/homo/100x100/"
-#    BM4D:
-#      'Absorbing Square': "results/3D/bm4d/absorb/100x100/"
-#      'Refractive Square': "results/3D/bm4d/refractive/100x100/"
-#      'Homogenous': "results/3D/bm4d/homo/100x100/"
-    'GPU ANLM':
-      'Absorbing Square': "results/3D/gpu_anlm/absorb/100x100/"
-      'Refractive Square': "results/3D/cascaded/refractive/100x100/"
-      'Homogenous': "results/3D/gpu_anlm/homo/100x100/"
+      'Absorbing Square': "data/test/2D/absorb/100x100/"
+      'Refractive Square': "data/test/2D/refractive/100x100/"
+      'Homogenous': "data/test/2D/homo/100x100/"
+    NLM:
+      'Absorbing Square': "results/2D/nlm/absorb/100x100/"
+      'Refractive Square': "results/2D/nlm/refractive/100x100/"
+      'Homogenous': "results/2D/nlm/homo/100x100/"
+    BM3D:
+      'Absorbing Square': "results/2D/bm4d/absorb/100x100/"
+      'Refractive Square': "results/2D/bm4d/refractive/100x100/"
+      'Homogenous': "results/2D/bm4d/homo/100x100/"
     DnCNN:
-      'Absorbing Square': "results/3D/dncnn/absorb/100x100/"
-      'Refractive Square': "results/3D/dncnn/refractive/100x100/"
-      'Homogenous': "results/3D/dncnn/homo/100x100/"
+      'Absorbing Square': "results/2D/dncnn/absorb/100x100/"
+      'Refractive Square': "results/2D/dncnn/refractive/100x100/"
+      'Homogenous': "results/2D/dncnn/homo/100x100/"
     ResMCNet:
-      'Absorbing Square': "results/3D/resmcnet/absorb/100x100/"
-      'Refractive Square': "results/3D/resmcnet/refractive/100x100/"
-      'Homogenous': "results/3D/resmcnet/homo/100x100/"
+      'Absorbing Square': "results/2D/resmcnet/absorb/100x100/"
+      'Refractive Square': "results/2D/resmcnet/refractive/100x100/"
+      'Homogenous': "results/2D/resmcnet/homo/100x100/"
     Cascaded:
-      'Absorbing Square': "results/3D/cascaded/absorb/100x100/"
-      'Refractive Square': "results/3D/cascaded/refractive/100x100/"
-      'Homogenous': "results/3D/cascaded/homo/100x100/"
+      'Absorbing Square': "results/2D/cascaded/absorb/100x100/"
+      'Refractive Square': "results/2D/cascaded/refractive/100x100/"
+      'Homogenous': "results/2D/cascaded/homo/100x100/"
     UNet:
-      'Absorbing Square': "results/3D/unet/absorb/100x100/"
-      'Refractive Square': "results/3D/unet/refractive/100x100/"
-      'Homogenous': "results/3D/unet/homo/100x100/"
+      'Absorbing Square': "results/2D/unet/absorb/100x100/"
+      'Refractive Square': "results/2D/unet/refractive/100x100/"
+      'Homogenous': "results/2D/unet/homo/100x100/"
     DRUNet:
-      'Absorbing Square': "results/3D/drunet/absorb/100x100/"
-      'Refractive Square': "results/3D/drunet/refractive/100x100/"
-      'Homogenous': "results/3D/drunet/homo/100x100/"
+      'Absorbing Square': "results/2D/drunet/absorb/100x100/"
+      'Refractive Square': "results/2D/drunet/refractive/100x100/"
+      'Homogenous': "results/2D/drunet/homo/100x100/"
 
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"

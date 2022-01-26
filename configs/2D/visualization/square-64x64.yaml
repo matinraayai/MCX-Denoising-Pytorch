@@ -37,6 +37,6 @@ dataset:
   output_label: "x1e9"
 dataset_name_on_rows: True
 output_path: "./visualization/2D/square-64x64"
-font_size: 30
-fig_size: (60, 50)
+font_size: 35
+fig_size: (80, 20)
 
