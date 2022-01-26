@@ -14,12 +14,12 @@ dataset:
   crop: "(slice(20, -22), slice(45, -25), 50)"
   rotate:
     do: True
-    k: 0
+    k: 1
 contour:
   path: "./matlab/volume/digimouse.mat"
   name: "digimouse"
 dataset_name_on_rows: True
 output_dir: "./visualization/3D/digimouse/"
 font_size: 70
-fig_size: (90, 10)
+fig_size: (58, 45)
 

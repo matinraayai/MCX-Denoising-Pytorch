@@ -2,9 +2,9 @@ dataset:
   path: "data/train/3D/demo/"
   input_labels: ["x1e5", "x1e6", "x1e7", "x1e8"]
   output_label: "x1e9"
-  crops: [32, 14, 20, 35, 28, 32, 10, 40, 15, 30]
+  crops: [32, 14, 20, 35, 28, 40, 15, 30]
 dataset_name_on_rows: True
 output_path: "./visualization/3D/square-train"
 font_size: 35
-fig_size: (35, 45)
+fig_size: (20, 33)
 

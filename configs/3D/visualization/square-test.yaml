@@ -7,6 +7,6 @@ dataset:
   output_label: "x1e9"
 dataset_name_on_rows: True
 output_path: "./visualization/3D/square-test"
-font_size: 35
-fig_size: (60, 35)
+font_size: 50
+fig_size: (50, 30)
 
