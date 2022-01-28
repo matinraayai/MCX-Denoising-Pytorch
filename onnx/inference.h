@@ -13,9 +13,7 @@
 enum class ExecutionProvider {TensorRT, CUDA, ROCM};
 #define BLOCKDIM1D 32
 
-template <typename scalar_t>
-std::vector<scalar_t> denoise(std::vector<scalar_t> fluence_map, const std::vector<int64_t> shape,
-                              const ExecutionProvider execution_provider);
+std::vector<float> denoise(std::vector<float> fluence_map, const std::vector<int64_t> shape);
 
 
 #endif //MCX_DENOISE_INFERENCE_CUH
