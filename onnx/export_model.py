@@ -7,6 +7,7 @@ import sys
 sys.path.append('..')
 from model.builder import load_model_from_lightning_checkpoint
 
+
 class UNet(nn.Module):
     def __init__(self):
         super(UNet, self).__init__()
@@ -168,9 +169,20 @@ class CascadedDnCNNWithUNet(nn.Module):
         self.unet = UNet()
 
     def forward(self, x):
-        x = self.dncnn0(x)
-        x = self.unet(x)
-        return x
+        # Input pre-processing
+        x = x.unsqueeze_(0).unsqueeze_(0)
+        low = torch.log1p(x)
+        high = torch.log1p(10**7 * x)
+        # Low inference
+        low = self.dncnn0(low)
+        low = self.unet(low)
+        low = (torch.exp(low) - 1) / 10**7
+        # High inference
+        high = self.dncnn0(high)
+        high = self.unet(high)
+        high = (torch.exp(high) - 1)
+        x = torch.where(x > 0.03, high, low)
+        return x.squeeze()
 
 
 def get_args():
@@ -188,8 +200,9 @@ def main():
     model = CascadedDnCNNWithUNet().cuda()
     model = load_model_from_lightning_checkpoint(args.checkpoint_path, model)
     scripted_model = torch.jit.script(model)
-    torch.onnx.export(scripted_model, torch.rand((1, 1, 64, 64, 64), device='cuda'), args.onnx_path,
-                      verbose=True, input_names=('noisy',), output_names=('clean',))
+    torch.onnx.export(scripted_model, torch.rand((64, 64, 64), device='cuda'), args.onnx_path,
+                      verbose=True, input_names=['noisy'], output_names=['clean'],
+                      dynamic_axes={"noisy": [0, 1, 2], "clean": [0, 1, 2]})
 
 
 if __name__ == '__main__':
