@@ -1,0 +1,16 @@
+dataset:
+  paths:
+    Simulation: "data/test/3D/lens/"
+    "Cascaded": "results/3D/cascaded/lens/"
+    "GPU ANLM": "results/3D/gpu_anlm/lens/"
+  labels: ["x1e5", "x1e6", "x1e7", "x1e8", "x1e9"]
+cross_section:
+  x: 50
+  y: 50
+figures:
+  legend: False
+  fig_type: "save"
+output_path: "./analysis/3D/lens"
+zero_infs: False
+zero_nans: False
+

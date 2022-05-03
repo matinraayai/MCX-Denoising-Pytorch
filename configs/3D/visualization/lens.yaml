@@ -1,0 +1,24 @@
+dataset:
+  paths:
+    simulation: "data/test/3D/lens/"
+    simulation: "data/generate/benchmark-lens/"
+    BM4D: "results/3D/bm4d/lens/"
+    'GPU ANLM': "results/3D/gpu_anlm/lens/"
+    DnCNN: "results/3D/dncnn/lens/"
+    ResMCNet: "results/3D/resmcnet/lens"
+    Cascaded: "results/3D/cascaded/lens/"
+    UNet: "results/3D/unet/lens/"
+    DRUNet: "results/3D/drunet/lens/"
+
+  input_labels: ["x1e5", "x1e6", "x1e7", "x1e8", "x1e7"]
+  output_label: "x1e9"
+  crop: "(slice(0, None), 50, slice(0, None))"
+  rotate:
+    do: False
+    k: 0
+contour: None
+dataset_name_on_rows: True
+output_dir: "./visualization/3D/lens/"
+font_size: 70
+fig_size: (75, 22)
+
