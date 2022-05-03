@@ -37,12 +37,16 @@ def get_model(**kwargs):
     return model
 
 
-def create_model_from_lightning_checkpoint(checkpoint_dir, **kwargs):
-    model = get_model(**kwargs).cuda()
+def load_model_from_lightning_checkpoint(checkpoint_dir, model):
     state_dict = torch.load(checkpoint_dir)['state_dict']
     state_dict = {key[6:]: value for key, value in state_dict.items()}
     model.load_state_dict(state_dict)
     return model
+
+
+def create_model_from_lightning_checkpoint(checkpoint_dir, **kwargs):
+    model = get_model(**kwargs).cuda()
+    return load_model_from_lightning_checkpoint(checkpoint_dir, model)
 
 
 def get_loss(loss_opt=(), **kwargs):
