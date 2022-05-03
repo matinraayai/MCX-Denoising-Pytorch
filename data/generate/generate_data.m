@@ -31,6 +31,8 @@ function generate_data(dim, type, photon_list, n, output_dir, overwrite, shape_r
             cfg_lambda = @() (get_3d_cube_benchmark_cfg('homo', gpu_ids, img_dims));
         elseif strcmp(type, 'benchmark refractive')
             cfg_lambda = @() (get_3d_cube_benchmark_cfg('refractive', gpu_ids, img_dims));
+        elseif strcmp(type, 'benchmark lens')
+            cfg_lambda = @() (get_3d_cube_benchmark_cfg('lens', gpu_ids, img_dims));
         elseif strcmp(type, 'colin27')
             cfg_lambda = @() (get_3d_colin27_cfg(gpu_ids));
         elseif strcmp(type, 'digimouse')

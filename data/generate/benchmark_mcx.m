@@ -7,6 +7,8 @@ function time = benchmark_mcx(type, num_phtns, n, dim)
         cfg_lambda = @() (get_3d_cube_benchmark_cfg('homo', 1, [dim dim dim]));
     elseif strcmp(type, 'benchmark refractive')
         cfg_lambda = @() (get_3d_cube_benchmark_cfg('refractive', 1, [dim dim dim]));
+    elseif strcmp(type, 'benchmark lens')
+        cfg_lambda = @() (get_3d_cube_benchmark_cfg('lens', 1, [dim dim dim]));
     elseif strcmp(type, 'colin27')
         cfg_lambda = @() (get_3d_colin27_cfg(1));
     elseif strcmp(type, 'digimouse')
